@@ -5,49 +5,32 @@
 _main:                                  ; @main
 	.cfi_startproc
 ; %bb.0:
-	sub	sp, sp, #64
-	stp	x29, x30, [sp, #48]             ; 16-byte Folded Spill
-	add	x29, sp, #48
+	sub	sp, sp, #32
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
 	.cfi_def_cfa w29, 16
 	.cfi_offset w30, -8
 	.cfi_offset w29, -16
-	sub	x8, x29, #8
-	str	x8, [sp, #16]
-	sub	x8, x29, #16
-	sub	x9, x29, #4
-	stp	x9, x8, [sp]
+	add	x8, sp, #8
+	str	x8, [sp]
 Lloh0:
 	adrp	x0, l_.str@PAGE
 Lloh1:
 	add	x0, x0, l_.str@PAGEOFF
 	bl	_scanf
-	ldur	w8, [x29, #-8]
-	cmp	w8, #1
-	b.lt	LBB0_4
-; %bb.1:
-	ldur	s0, [x29, #-4]
-	sshll.2d	v0, v0, #0
-	scvtf	d0, d0
-	mov	x9, #4636737291354636288        ; =0x4059000000000000
-	fmov	d1, x9
-	fdiv	d0, d0, d1
-	fmov	d1, #1.00000000
-	fadd	d0, d0, d1
-	ldur	d1, [x29, #-16]
-	mov	x9, x8
-LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
-	fmul	d1, d0, d1
-	subs	w9, w9, #1
-	b.ne	LBB0_2
-; %bb.3:
-	stur	d1, [x29, #-16]
-	b	LBB0_5
-LBB0_4:
-	mov	w8, #0                          ; =0x0
-LBB0_5:
-	stur	w8, [x29, #-4]
-	ldur	d0, [x29, #-16]
-	fcvtzs	w8, d0
+	ldr	x8, [sp, #8]
+	mov	x9, #1                          ; =0x1
+	madd	x9, x8, x8, x9
+	mov	x12, x8
+LBB0_1:                                 ; =>This Inner Loop Header: Depth=1
+	mov	x10, x12
+	udiv	x11, x9, x12
+	msub	x13, x11, x12, x9
+	sub	x12, x12, #1
+	cbnz	x13, LBB0_1
+; %bb.2:
+	add	x8, x10, x8, lsl #1
+	add	x8, x8, x11
 	str	x8, [sp]
 Lloh2:
 	adrp	x0, l_.str.1@PAGE
@@ -55,8 +38,8 @@ Lloh3:
 	add	x0, x0, l_.str.1@PAGEOFF
 	bl	_printf
 	mov	w0, #0                          ; =0x0
-	ldp	x29, x30, [sp, #48]             ; 16-byte Folded Reload
-	add	sp, sp, #64
+	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #32
 	ret
 	.loh AdrpAdd	Lloh0, Lloh1
 	.loh AdrpAdd	Lloh2, Lloh3
@@ -64,9 +47,9 @@ Lloh3:
                                         ; -- End function
 	.section	__TEXT,__cstring,cstring_literals
 l_.str:                                 ; @.str
-	.asciz	"%d %lf %d"
+	.asciz	"%ld"
 
 l_.str.1:                               ; @.str.1
-	.asciz	"%d\n"
+	.asciz	"%ld\n"
 
 .subsections_via_symbols

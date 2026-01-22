@@ -5,143 +5,65 @@
 _main:                                  ; @main
 	.cfi_startproc
 ; %bb.0:
-	sub	sp, sp, #144
-	stp	x26, x25, [sp, #64]             ; 16-byte Folded Spill
-	stp	x24, x23, [sp, #80]             ; 16-byte Folded Spill
-	stp	x22, x21, [sp, #96]             ; 16-byte Folded Spill
-	stp	x20, x19, [sp, #112]            ; 16-byte Folded Spill
-	stp	x29, x30, [sp, #128]            ; 16-byte Folded Spill
-	add	x29, sp, #128
+	sub	sp, sp, #80
+	stp	d11, d10, [sp, #16]             ; 16-byte Folded Spill
+	stp	d9, d8, [sp, #32]               ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #48]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #64]             ; 16-byte Folded Spill
+	add	x29, sp, #64
 	.cfi_def_cfa w29, 16
 	.cfi_offset w30, -8
 	.cfi_offset w29, -16
 	.cfi_offset w19, -24
 	.cfi_offset w20, -32
-	.cfi_offset w21, -40
-	.cfi_offset w22, -48
-	.cfi_offset w23, -56
-	.cfi_offset w24, -64
-	.cfi_offset w25, -72
-	.cfi_offset w26, -80
+	.cfi_offset b8, -40
+	.cfi_offset b9, -48
+	.cfi_offset b10, -56
+	.cfi_offset b11, -64
+	mov	x8, #4607182418800017408        ; =0x3ff0000000000000
+	str	x8, [sp]
 Lloh0:
-	adrp	x21, _color@GOTPAGE
-Lloh1:
-	ldr	x21, [x21, _color@GOTPAGEOFF]
-	mov	w20, #16                        ; =0x10
-Lloh2:
-	adrp	x19, l_.str@PAGE
-Lloh3:
-	add	x19, x19, l_.str@PAGEOFF
-	mov	x22, x21
-LBB0_1:                                 ; =>This Inner Loop Header: Depth=1
-	add	x8, x22, #4
-	add	x9, x22, #8
-	stp	x8, x9, [sp, #8]
-	str	x22, [sp]
-	mov	x0, x19
-	bl	_scanf
-	add	x22, x22, #12
-	subs	x20, x20, #1
-	b.ne	LBB0_1
-; %bb.2:
-	add	x22, sp, #52
-	add	x23, sp, #56
-	add	x24, sp, #60
-	stp	x23, x22, [sp, #8]
-	str	x24, [sp]
-Lloh4:
 	adrp	x0, l_.str@PAGE
-Lloh5:
+Lloh1:
 	add	x0, x0, l_.str@PAGEOFF
-	bl	_scanf
-	ldp	w9, w8, [sp, #56]
-	ldr	w10, [sp, #52]
-	cmn	w8, #1
-	b.ne	LBB0_5
-; %bb.3:
-	cmn	w9, #1
-	b.ne	LBB0_5
-; %bb.4:
-	cmn	w10, #1
-	b.eq	LBB0_11
-LBB0_5:
-	mov	w25, #12                        ; =0xc
-Lloh6:
+	bl	_printf
+	mov	w20, #1                         ; =0x1
+	fmov	d8, #1.00000000
+Lloh2:
 	adrp	x19, l_.str.1@PAGE
-Lloh7:
+Lloh3:
 	add	x19, x19, l_.str.1@PAGEOFF
-                                        ; implicit-def: $w26
-Lloh8:
-	adrp	x20, l_.str@PAGE
-Lloh9:
-	add	x20, x20, l_.str@PAGEOFF
-LBB0_6:                                 ; =>This Loop Header: Depth=1
-                                        ;     Child Loop BB0_7 Depth 2
-	mov	x11, #0                         ; =0x0
-	add	x12, x21, #8
-	mov	w13, #3392                      ; =0xd40
-	movk	w13, #3, lsl #16
-LBB0_7:                                 ;   Parent Loop BB0_6 Depth=1
-                                        ; =>  This Inner Loop Header: Depth=2
-	ldp	w14, w15, [x12, #-8]
-	sub	w14, w8, w14
-	mul	w14, w14, w14
-	sub	w15, w9, w15
-	madd	w14, w15, w15, w14
-	ldr	w15, [x12], #12
-	sub	w15, w10, w15
-	madd	w14, w15, w15, w14
-	cmp	w14, w13
-	csel	w13, w14, w13, lt
-	csel	w26, w11, w26, lt
-	add	x11, x11, #1
-	cmp	x11, #16
-	b.ne	LBB0_7
-; %bb.8:                                ;   in Loop: Header=BB0_6 Depth=1
-	smaddl	x11, w26, w25, x21
-	ldp	w12, w13, [x11]
-	ldr	w11, [x11, #8]
-	stp	x13, x11, [sp, #32]
-	stp	x10, x12, [sp, #16]
-	stp	x8, x9, [sp]
+	fmov	d9, #1.00000000
+	fmov	d10, #1.00000000
+	fmov	d11, #1.00000000
+LBB0_1:                                 ; =>This Inner Loop Header: Depth=1
+	fdiv	d9, d9, d11
+	fadd	d10, d10, d9
+	str	x20, [sp]
+	str	d10, [sp, #8]
 	mov	x0, x19
 	bl	_printf
-	stp	x23, x22, [sp, #8]
-	str	x24, [sp]
-	mov	x0, x20
-	bl	_scanf
-	ldp	w9, w8, [sp, #56]
-	ldr	w10, [sp, #52]
-	cmn	w8, #1
-	b.ne	LBB0_6
-; %bb.9:                                ;   in Loop: Header=BB0_6 Depth=1
-	cmn	w9, #1
-	b.ne	LBB0_6
-; %bb.10:                               ;   in Loop: Header=BB0_6 Depth=1
-	cmn	w10, #1
-	b.ne	LBB0_6
-LBB0_11:
+	fadd	d11, d11, d8
+	add	w20, w20, #1
+	cmp	w20, #10
+	b.ne	LBB0_1
+; %bb.2:
 	mov	w0, #0                          ; =0x0
-	ldp	x29, x30, [sp, #128]            ; 16-byte Folded Reload
-	ldp	x20, x19, [sp, #112]            ; 16-byte Folded Reload
-	ldp	x22, x21, [sp, #96]             ; 16-byte Folded Reload
-	ldp	x24, x23, [sp, #80]             ; 16-byte Folded Reload
-	ldp	x26, x25, [sp, #64]             ; 16-byte Folded Reload
-	add	sp, sp, #144
+	ldp	x29, x30, [sp, #64]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #48]             ; 16-byte Folded Reload
+	ldp	d9, d8, [sp, #32]               ; 16-byte Folded Reload
+	ldp	d11, d10, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #80
 	ret
 	.loh AdrpAdd	Lloh2, Lloh3
-	.loh AdrpLdrGot	Lloh0, Lloh1
-	.loh AdrpAdd	Lloh4, Lloh5
-	.loh AdrpAdd	Lloh8, Lloh9
-	.loh AdrpAdd	Lloh6, Lloh7
+	.loh AdrpAdd	Lloh0, Lloh1
 	.cfi_endproc
                                         ; -- End function
 	.section	__TEXT,__cstring,cstring_literals
 l_.str:                                 ; @.str
-	.asciz	"%d%d%d"
+	.asciz	"n e\n- -----------\n0 %.9lf\n"
 
-	.comm	_color,192,2                    ; @color
 l_.str.1:                               ; @.str.1
-	.asciz	"(%d,%d,%d) maps to (%d,%d,%d)\n"
+	.asciz	"%d %.9lf\n"
 
 .subsections_via_symbols

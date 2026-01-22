@@ -5,14 +5,13 @@
 _main:                                  ; @main
 	.cfi_startproc
 ; %bb.0:
-	stp	x28, x27, [sp, #-96]!           ; 16-byte Folded Spill
-	stp	x26, x25, [sp, #16]             ; 16-byte Folded Spill
-	stp	x24, x23, [sp, #32]             ; 16-byte Folded Spill
-	stp	x22, x21, [sp, #48]             ; 16-byte Folded Spill
-	stp	x20, x19, [sp, #64]             ; 16-byte Folded Spill
-	stp	x29, x30, [sp, #80]             ; 16-byte Folded Spill
-	add	x29, sp, #80
-	sub	sp, sp, #4032
+	sub	sp, sp, #112
+	stp	d11, d10, [sp, #32]             ; 16-byte Folded Spill
+	stp	d9, d8, [sp, #48]               ; 16-byte Folded Spill
+	stp	x22, x21, [sp, #64]             ; 16-byte Folded Spill
+	stp	x20, x19, [sp, #80]             ; 16-byte Folded Spill
+	stp	x29, x30, [sp, #96]             ; 16-byte Folded Spill
+	add	x29, sp, #96
 	.cfi_def_cfa w29, 16
 	.cfi_offset w30, -8
 	.cfi_offset w29, -16
@@ -20,176 +19,79 @@ _main:                                  ; @main
 	.cfi_offset w20, -32
 	.cfi_offset w21, -40
 	.cfi_offset w22, -48
-	.cfi_offset w23, -56
-	.cfi_offset w24, -64
-	.cfi_offset w25, -72
-	.cfi_offset w26, -80
-	.cfi_offset w27, -88
-	.cfi_offset w28, -96
+	.cfi_offset b8, -56
+	.cfi_offset b9, -64
+	.cfi_offset b10, -72
+	.cfi_offset b11, -80
+	add	x21, sp, #28
+	str	x21, [sp]
 Lloh0:
-	adrp	x8, ___stack_chk_guard@GOTPAGE
-Lloh1:
-	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
-Lloh2:
-	ldr	x8, [x8]
-	stur	x8, [x29, #-88]
-	add	x20, sp, #20
-	str	x20, [sp]
-Lloh3:
 	adrp	x0, l_.str@PAGE
-Lloh4:
+Lloh1:
 	add	x0, x0, l_.str@PAGEOFF
 	bl	_scanf
-	ldr	w8, [sp, #20]
-	cbz	w8, LBB0_19
+	cmn	w0, #1
+	b.eq	LBB0_3
 ; %bb.1:
-	add	x21, sp, #24
-	add	x22, x21, #4
+	fmov	d8, #1.00000000
+	fmov	d9, #8.00000000
+	fmov	d10, #-1.00000000
+Lloh2:
+	adrp	x19, l_.str.1@PAGE
+Lloh3:
+	add	x19, x19, l_.str.1@PAGEOFF
+	fmov	d11, #0.50000000
+Lloh4:
+	adrp	x20, l_.str@PAGE
 Lloh5:
-	adrp	x19, l_.str@PAGE
-Lloh6:
-	add	x19, x19, l_.str@PAGEOFF
-Lloh7:
-	adrp	x23, l_str.4@PAGE
-Lloh8:
-	add	x23, x23, l_str.4@PAGEOFF
-Lloh9:
-	adrp	x24, l_str@PAGE
-Lloh10:
-	add	x24, x24, l_str@PAGEOFF
-	b	LBB0_3
-LBB0_2:                                 ;   in Loop: Header=BB0_3 Depth=1
-	mov	w0, #10                         ; =0xa
-	bl	_putchar
-	str	x20, [sp]
+	add	x20, x20, l_.str@PAGEOFF
+LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
+	ldr	w8, [sp, #28]
+	scvtf	d0, w8
+	fmadd	d0, d0, d9, d8
+	fsqrt	d0, d0
+	fadd	d0, d0, d10
+	fmul	d0, d0, d11
+	fcvtzs	w9, d0
+	scvtf	d1, w9
+	fcmp	d0, d1
+	cinc	w9, w9, ne
+	sub	w10, w9, #1
+	mul	w10, w10, w9
+	add	w10, w10, w10, lsr #31
+	sub	w10, w8, w10, asr #1
+	sub	w11, w9, w10
+	tst	w9, #0x1
+	csinc	w9, w10, w11, eq
+	csinc	w10, w10, w11, ne
+	stp	x9, x10, [sp, #8]
+	str	x8, [sp]
 	mov	x0, x19
-	bl	_scanf
-	ldr	w8, [sp, #20]
-	cbz	w8, LBB0_19
-LBB0_3:                                 ; =>This Loop Header: Depth=1
-                                        ;     Child Loop BB0_6 Depth 2
-                                        ;     Child Loop BB0_10 Depth 2
-                                        ;       Child Loop BB0_13 Depth 3
+	bl	_printf
 	str	x21, [sp]
-	mov	x0, x19
+	mov	x0, x20
 	bl	_scanf
-	ldr	w8, [sp, #24]
-	cbz	w8, LBB0_2
-; %bb.4:                                ;   in Loop: Header=BB0_3 Depth=1
-	ldr	w8, [sp, #20]
-	cmp	w8, #1
-	b.le	LBB0_7
-; %bb.5:                                ;   in Loop: Header=BB0_3 Depth=1
-	mov	x25, x22
-	mov	w26, #1                         ; =0x1
-LBB0_6:                                 ;   Parent Loop BB0_3 Depth=1
-                                        ; =>  This Inner Loop Header: Depth=2
-	str	x25, [sp]
-	mov	x0, x19
-	bl	_scanf
-	add	x26, x26, #1
-	ldrsw	x8, [sp, #20]
-	add	x25, x25, #4
-	cmp	x26, x8
-	b.lt	LBB0_6
-LBB0_7:                                 ;   in Loop: Header=BB0_3 Depth=1
-	cmp	w8, #1
-	b.lt	LBB0_17
-; %bb.8:                                ;   in Loop: Header=BB0_3 Depth=1
-	mov	x16, #0                         ; =0x0
-	mov	w9, w8
-	sub	x10, x9, #1
-	mov	w13, #1                         ; =0x1
-	mov	w11, #2                         ; =0x2
-	mov	x12, x22
-	b	LBB0_10
-LBB0_9:                                 ;   in Loop: Header=BB0_10 Depth=2
-	add	x12, x12, #4
-	sub	x10, x10, #1
-	add	w11, w11, #1
-	mov	x16, x14
-	mov	x13, x15
-	cmp	x14, x9
-	b.eq	LBB0_17
-LBB0_10:                                ;   Parent Loop BB0_3 Depth=1
-                                        ; =>  This Loop Header: Depth=2
-                                        ;       Child Loop BB0_13 Depth 3
-	add	x14, x16, #1
-	cmp	x14, x9
-	cset	w15, lo
-	b.hs	LBB0_9
-; %bb.11:                               ;   in Loop: Header=BB0_10 Depth=2
-	ldr	w16, [x21, x16, lsl #2]
-	mov	w2, #1                          ; =0x1
-	mov	x17, x11
-	mov	x0, x10
-	mov	x1, x12
-	mov	x3, x16
-	b	LBB0_13
-LBB0_12:                                ;   in Loop: Header=BB0_13 Depth=3
-	cmp	w8, w17
-	cset	w2, gt
-	add	w17, w17, #1
-	subs	x0, x0, #1
-	b.eq	LBB0_9
-LBB0_13:                                ;   Parent Loop BB0_3 Depth=1
-                                        ;     Parent Loop BB0_10 Depth=2
-                                        ; =>    This Inner Loop Header: Depth=3
-	ldr	w4, [x1], #4
-	cmp	w4, w16
-	b.gt	LBB0_12
-; %bb.14:                               ;   in Loop: Header=BB0_13 Depth=3
-	cmp	w3, w4
-	mov	x3, x4
-	b.gt	LBB0_12
-; %bb.15:                               ;   in Loop: Header=BB0_10 Depth=2
-	tbz	w2, #0, LBB0_9
-; %bb.16:                               ;   in Loop: Header=BB0_3 Depth=1
-	mov	x0, x23
-	tbnz	w13, #0, LBB0_18
-LBB0_17:                                ;   in Loop: Header=BB0_3 Depth=1
-	mov	x0, x24
-LBB0_18:                                ;   in Loop: Header=BB0_3 Depth=1
-	bl	_puts
-	b	LBB0_3
-LBB0_19:
-	ldur	x8, [x29, #-88]
-Lloh11:
-	adrp	x9, ___stack_chk_guard@GOTPAGE
-Lloh12:
-	ldr	x9, [x9, ___stack_chk_guard@GOTPAGEOFF]
-Lloh13:
-	ldr	x9, [x9]
-	cmp	x9, x8
-	b.ne	LBB0_21
-; %bb.20:
+	cmn	w0, #1
+	b.ne	LBB0_2
+LBB0_3:
 	mov	w0, #0                          ; =0x0
-	add	sp, sp, #4032
-	ldp	x29, x30, [sp, #80]             ; 16-byte Folded Reload
-	ldp	x20, x19, [sp, #64]             ; 16-byte Folded Reload
-	ldp	x22, x21, [sp, #48]             ; 16-byte Folded Reload
-	ldp	x24, x23, [sp, #32]             ; 16-byte Folded Reload
-	ldp	x26, x25, [sp, #16]             ; 16-byte Folded Reload
-	ldp	x28, x27, [sp], #96             ; 16-byte Folded Reload
+	ldp	x29, x30, [sp, #96]             ; 16-byte Folded Reload
+	ldp	x20, x19, [sp, #80]             ; 16-byte Folded Reload
+	ldp	x22, x21, [sp, #64]             ; 16-byte Folded Reload
+	ldp	d9, d8, [sp, #48]               ; 16-byte Folded Reload
+	ldp	d11, d10, [sp, #32]             ; 16-byte Folded Reload
+	add	sp, sp, #112
 	ret
-LBB0_21:
-	bl	___stack_chk_fail
-	.loh AdrpAdd	Lloh3, Lloh4
-	.loh AdrpLdrGotLdr	Lloh0, Lloh1, Lloh2
-	.loh AdrpAdd	Lloh9, Lloh10
-	.loh AdrpAdd	Lloh7, Lloh8
-	.loh AdrpAdd	Lloh5, Lloh6
-	.loh AdrpLdrGotLdr	Lloh11, Lloh12, Lloh13
+	.loh AdrpAdd	Lloh0, Lloh1
+	.loh AdrpAdd	Lloh4, Lloh5
+	.loh AdrpAdd	Lloh2, Lloh3
 	.cfi_endproc
                                         ; -- End function
 	.section	__TEXT,__cstring,cstring_literals
 l_.str:                                 ; @.str
 	.asciz	"%d"
 
-l_str:                                  ; @str
-	.asciz	"Yes"
-
-l_str.4:                                ; @str.4
-	.asciz	"No"
+l_.str.1:                               ; @.str.1
+	.asciz	"TERM %d IS %d/%d\n"
 
 .subsections_via_symbols
