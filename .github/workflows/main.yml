@@ -1,4 +1,3 @@
-# .github/workflows/test-arm64-with-export.yml
 name: Test ARM64 Assembly (With Export)
 
 on: [push, workflow_dispatch]
