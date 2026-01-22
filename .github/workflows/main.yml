@@ -77,27 +77,5 @@ jobs:
         done
         
         echo "ARM 汇编生成完成"
-    
-    - name: Generate summary
-      run: |
-        echo "=== 生成汇总 ==="
-        
-        if [ -d "assembly_output" ]; then
-          echo "汇编输出目录结构:"
-          find assembly_output -type f -name "*.s" | sort
-          
-          echo ""
-          echo "文件统计:"
-          total_dirs=$(find assembly_output -type d | tail -n +2 | wc -l)
-          x86_files=$(find assembly_output -name "x86.s" | wc -l)
-          arm_files=$(find assembly_output -name "arm.s" | wc -l)
-          total_files=$((x86_files + arm_files))
-          
-          echo "总目录数: $total_dirs"
-          echo "x86 文件数: $x86_files"
-          echo "ARM 文件数: $arm_files"
-          echo "总汇编文件数: $total_files"
-          
-          # 生成 README
-          cat > assembly_output/README.md << 'EOF'
+  
 
