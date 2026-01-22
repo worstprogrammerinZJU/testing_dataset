@@ -127,4 +127,10 @@ jobs:
           
           # 生成 README
           cat > assembly_output/README.md << 'EOF'
-
+          
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: assembly-results
+        path: assembly_output/
+        retention-days: 30
