@@ -98,6 +98,33 @@ jobs:
           echo "ARM 文件数: $arm_files"
           echo "总汇编文件数: $total_files"
           
+          # 生成 README - 使用简单的echo
+          echo "# 汇编代码输出" > assembly_output/README.md
+          echo "" >> assembly_output/README.md
+          echo "此目录包含从 C 源代码编译生成的汇编代码。" >> assembly_output/README.md
+          echo "" >> assembly_output/README.md
+          echo "## 目录结构" >> assembly_output/README.md
+          echo '```' >> assembly_output/README.md
+          echo "assembly_output/" >> assembly_output/README.md
+          echo "├── algorithm_001/" >> assembly_output/README.md
+          echo "│   ├── x86.s    # x86_64 汇编" >> assembly_output/README.md
+          echo "│   └── arm.s    # ARM64 汇编" >> assembly_output/README.md
+          echo "├── algorithm_002/" >> assembly_output/README.md
+          echo "│   ├── x86.s" >> assembly_output/README.md
+          echo "│   └── arm.s" >> assembly_output/README.md
+          echo "└── ..." >> assembly_output/README.md
+          echo '```' >> assembly_output/README.md
+          echo "" >> assembly_output/README.md
+          echo "## 编译信息" >> assembly_output/README.md
+          echo "- 编译器: Apple clang (macOS 版本)" >> assembly_output/README.md
+          echo "- 优化级别: -O1" >> assembly_output/README.md
+          echo "- 架构: x86_64 和 ARM64" >> assembly_output/README.md
+          echo "- 生成时间: $(date)" >> assembly_output/README.md
+          
+        else
+          echo "错误: assembly_output 目录不存在"
+        fi
+          
           # 生成 README
           cat > assembly_output/README.md << 'EOF'
 
