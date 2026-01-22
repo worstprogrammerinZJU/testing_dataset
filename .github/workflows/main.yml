@@ -1,10 +1,10 @@
-# .github/workflows/test-arm64-simple-export.yml
-name: Test ARM64 Assembly (Simple Export)
+# .github/workflows/test-arm64-keep-name.yml
+name: Test ARM64 Assembly (Keep Original Names)
 
 on: [push, workflow_dispatch]
 
 jobs:
-  test-arm64-simple:
+  test-arm64-keep-name:
     runs-on: macos-latest
     
     steps:
@@ -14,117 +14,51 @@ jobs:
     - name: Install tools
       run: |
         brew install coreutils
-        which gtimeout
     
-    - name: Test and save successful files
+    - name: Test and save with original names
       run: |
-        echo "=== ARM64 汇编测试（简单导出）==="
+        echo "=== ARM64 汇编测试（保留原文件名）==="
         
-        # 创建输出目录
+        # 创建成功文件目录
         mkdir -p successful_files
         
         TOTAL=0
-        COMPILE_OK=0
-        EXECUTE_OK=0
+        SUCCESS=0
         
         for file in *.s; do
           if [ -f "$file" ]; then
             TOTAL=$((TOTAL + 1))
             NAME="${file%.s}"
             
-            echo ""
-            echo "测试: $NAME"
-            echo "========================================"
+            echo "测试: $file"
+            echo "----------------------------------------"
             
-            # 1. 编译
-            echo "编译..."
+            # 编译
             if clang "$file" -o "$NAME" 2>/dev/null; then
-              COMPILE_OK=$((COMPILE_OK + 1))
               echo "✅ 编译成功"
               
-              # 2. 分析程序需求
-              echo "分析程序需求..."
-              
-              STRINGS=$(strings "$file" 2>/dev/null | grep -E '%[dfs]' || true)
-              SCANF_CALLS=$(grep -c "bl.*scanf" "$file" 2>/dev/null || echo "0")
-              
-              echo "找到格式字符串: '$STRINGS'"
-              echo "scanf调用次数: $SCANF_CALLS"
-              
-              # 生成测试输入
-              INPUT_DATA=""
-              
-              if [ "$SCANF_CALLS" -gt 0 ]; then
-                if echo "$STRINGS" | grep -q "%d%d"; then
-                  INPUT_DATA="10 20\n"
-                elif echo "$STRINGS" | grep -q "%d"; then
-                  INPUT_DATA="42\n"
-                elif echo "$STRINGS" | grep -q "%s"; then
-                  INPUT_DATA="test\n"
-                elif echo "$STRINGS" | grep -q "%f"; then
-                  INPUT_DATA="3.14\n"
-                else
-                  INPUT_DATA="1\n2 3\n4 5\n6 7\n8 9\n10 11\n"
-                fi
-              fi
-              
-              # 3. 执行测试
-              echo "执行测试..."
-              
-              if [ -z "$INPUT_DATA" ]; then
-                # 没有输入的程序
-                if gtimeout 5 ./"$NAME" >/dev/null 2>&1; then
-                  EXECUTE_OK=$((EXECUTE_OK + 1))
-                  echo "✅ 执行成功"
-                  
-                  # 保存成功文件
-                  cp "$file" "successful_files/${EXECUTE_OK}_${NAME}.s"
-                  echo "📁 已保存: ${EXECUTE_OK}_${NAME}.s"
-                else
-                  echo "❌ 执行失败"
-                fi
+              # 执行测试
+              if echo -e "1\n2 3" | timeout 3 ./"$NAME" >/dev/null 2>&1; then
+                SUCCESS=$((SUCCESS + 1))
+                echo "✅ 执行成功"
+                
+                # 保存文件（保留原文件名）
+                cp "$file" "successful_files/$file"
+                echo "📁 已保存: $file"
               else
-                # 有输入的程序
-                if echo -e "$INPUT_DATA" | gtimeout 5 ./"$NAME" >/dev/null 2>&1; then
-                  EXECUTE_OK=$((EXECUTE_OK + 1))
-                  echo "✅ 执行成功"
-                  
-                  # 保存成功文件
-                  cp "$file" "successful_files/${EXECUTE_OK}_${NAME}.s"
-                  echo "📁 已保存: ${EXECUTE_OK}_${NAME}.s"
-                else
-                  echo "❌ 执行失败"
-                fi
+                echo "❌ 执行失败"
               fi
-              
             else
               echo "❌ 编译失败"
             fi
+            echo ""
           fi
         done
         
-        echo ""
         echo "========================================"
-        echo "测试完成"
-        echo "========================================"
-        echo "总文件数: $TOTAL"
-        echo "编译成功: $COMPILE_OK"
-        echo "执行成功: $EXECUTE_OK"
-        
-        if [ $TOTAL -gt 0 ]; then
-          COMPILE_RATE=$((COMPILE_OK * 100 / TOTAL))
-          echo "编译成功率: $COMPILE_RATE%"
-          
-          if [ $COMPILE_OK -gt 0 ]; then
-            EXECUTE_RATE=$((EXECUTE_OK * 100 / COMPILE_OK))
-            echo "执行成功率: $EXECUTE_RATE%"
-          fi
-        fi
-        
-        # 显示保存的文件列表
-        echo ""
-        echo "📁 成功文件列表:"
-        ls -la successful_files/ || echo "无成功文件"
+        echo "测试完成: $SUCCESS/$TOTAL 个文件成功"
+        echo "成功文件列表:"
+        ls -la successful_files/ 2>/dev/null || echo "无成功文件"
     
     - name: Upload successful files
       uses: actions/upload-artifact@v4
