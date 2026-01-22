@@ -20,7 +20,6 @@ jobs:
       run: |
         brew install qemu
         clang --version
-        qemu-aarch64 --version
     
     - name: Find and compile ARM files
       id: compile
