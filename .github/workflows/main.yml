@@ -100,8 +100,4 @@ jobs:
           
           # 生成 README
           cat > assembly_output/README.md << 'EOF'
-# 汇编代码输出
 
-此目录包含从 C 源代码编译生成的汇编代码。
-
-## 目录结构
