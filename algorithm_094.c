@@ -1,0 +1,19 @@
+// 源文件: 1953.c
+// 编号: 94
+// 提取自当前目录
+
+#include<stdio.h>
+__int64 football[50] = {1, 2 ,3};
+int main()
+{
+	int i, j, n;
+	for (i = 3; i <= 45; i++)
+		football[i] = football[i - 1] + football[i - 2];
+	scanf("%d", &n);
+	for (i = 1; i <= n; i++)
+	{
+		scanf("%d", &j);
+		printf("Scenario #%d:\n%I64d\n\n", i, football[j]);
+	}
+	return 0;
+}

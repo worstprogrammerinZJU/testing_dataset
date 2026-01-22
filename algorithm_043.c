@@ -1,0 +1,22 @@
+// 源文件: 1401.c
+// 编号: 43
+// 提取自当前目录
+
+#include<stdio.h>
+int main()
+{
+	int i,n,m,s;
+	scanf("%d",&n);
+	for (i=0;i<n;i++)
+	{
+		s=0;
+		scanf("%d",&m);
+		while (m)
+		{
+			m/=5;
+			s+=m;
+		}
+		printf("%d\n",s);
+	}
+	return 0;
+}
