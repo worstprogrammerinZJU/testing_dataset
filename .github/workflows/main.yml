@@ -1,0 +1,107 @@
+# .github/workflows/compile-to-assembly.yml
+name: Compile C to Assembly (x86 + ARM)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  compile-assembly:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup environment
+      run: |
+        echo "=== 环境信息 ==="
+        uname -a
+        clang --version
+        echo "当前目录:"
+        pwd
+        ls -la *.c 2>/dev/null | head -20
+    
+    - name: Create output directories
+      run: |
+        mkdir -p assembly_output
+        echo "创建输出目录: assembly_output"
+    
+    - name: Compile to x86 assembly
+      run: |
+        echo "=== 编译为 x86 汇编 ==="
+        
+        # 查找所有 .c 文件
+        for c_file in *.c; do
+          if [ -f "$c_file" ]; then
+            echo "处理: $c_file"
+            
+            # 为每个文件创建目录
+            filename_no_ext="${c_file%.*}"
+            mkdir -p "assembly_output/$filename_no_ext"
+            
+            # 编译为 x86 汇编
+            clang -S -O1 -fno-asynchronous-unwind-tables \
+              -target x86_64-apple-darwin \
+              "$c_file" \
+              -o "assembly_output/$filename_no_ext/x86.s" 2>/dev/null || \
+              echo "警告: $c_file 编译失败 (x86)"
+          fi
+        done
+        
+        echo "x86 汇编生成完成"
+    
+    - name: Compile to ARM assembly
+      run: |
+        echo "=== 编译为 ARM 汇编 ==="
+        
+        # 查找所有 .c 文件
+        for c_file in *.c; do
+          if [ -f "$c_file" ]; then
+            echo "处理: $c_file"
+            
+            # 为每个文件创建目录
+            filename_no_ext="${c_file%.*}"
+            mkdir -p "assembly_output/$filename_no_ext"
+            
+            # 编译为 ARM 汇编
+            clang -S -O1 -fno-asynchronous-unwind-tables \
+              -target arm64-apple-darwin \
+              "$c_file" \
+              -o "assembly_output/$filename_no_ext/arm.s" 2>/dev/null || \
+              echo "警告: $c_file 编译失败 (ARM)"
+          fi
+        done
+        
+        echo "ARM 汇编生成完成"
+    
+    - name: Generate summary
+      run: |
+        echo "=== 生成汇总 ==="
+        
+        if [ -d "assembly_output" ]; then
+          echo "汇编输出目录结构:"
+          find assembly_output -type f -name "*.s" | sort
+          
+          echo ""
+          echo "文件统计:"
+          total_dirs=$(find assembly_output -type d | tail -n +2 | wc -l)
+          x86_files=$(find assembly_output -name "x86.s" | wc -l)
+          arm_files=$(find assembly_output -name "arm.s" | wc -l)
+          total_files=$((x86_files + arm_files))
+          
+          echo "总目录数: $total_dirs"
+          echo "x86 文件数: $x86_files"
+          echo "ARM 文件数: $arm_files"
+          echo "总汇编文件数: $total_files"
+          
+          # 生成 README
+          cat > assembly_output/README.md << 'EOF'
+# 汇编代码输出
+
+此目录包含从 C 源代码编译生成的汇编代码。
+
+## 目录结构
