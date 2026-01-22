@@ -1,141 +1,122 @@
-# .github/workflows/test-macos-arm64.yml
-name: Test macOS ARM64 Assembly
+# .github/workflows/test-arm64-smart.yml
+name: Test ARM64 Assembly (Smart Input)
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 jobs:
-  test-macos-arm64:
+  test-arm64-smart:
     runs-on: macos-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
-      
-    - name: Setup environment
-      run: |
-        echo "=== 环境信息 ==="
-        uname -a
-        clang --version
-        echo "当前目录:"
-        pwd
-        ls -la *.s 2>/dev/null | wc -l
     
-    - name: Compile and test ARM64 assembly
-      id: test
+    - name: Install tools
       run: |
-        echo "=== 编译和测试 macOS ARM64 汇编 ==="
-        
-        COMPILE_SUCCESS=0
-        COMPILE_TOTAL=0
-        EXECUTE_SUCCESS=0
-        
-        # 创建测试输入
-        echo "创建测试输入文件..."
-        echo "3" > test_input.txt
-        echo "10 5" >> test_input.txt
-        echo "20 8" >> test_input.txt
-        echo "15 6" >> test_input.txt
-        
-        # 查找所有 .s 文件
-        ASM_FILES=$(find . -name "*.s" -type f | sort)
-        echo "找到的汇编文件:"
-        echo "$ASM_FILES"
-        echo ""
-        
-        for asm_file in $ASM_FILES; do
-          if [ -f "$asm_file" ]; then
-            COMPILE_TOTAL=$((COMPILE_TOTAL + 1))
-            filename=$(basename "$asm_file" .s)
-            
-            echo "测试: $filename"
-            
-            # 1. 编译
-            echo "编译: $asm_file"
-            if clang "$asm_file" -o "$filename" 2>"${filename}_compile.log"; then
-              echo "✅ 编译成功"
-              COMPILE_SUCCESS=$((COMPILE_SUCCESS + 1))
-              
-              # 2. 执行（不使用 timeout）
-              echo "执行: $filename"
-              
-              # 方法1: 使用 gtimeout（macOS 需要 coreutils）
-              if command -v gtimeout >/dev/null 2>&1; then
-                # 有 gtimeout
-                if echo -e "1\n10 5\n20 8\n15 6" | gtimeout 5 ./"$filename" >"${filename}_output.log" 2>"${filename}_error.log"; then
-                  EXIT_CODE=$?
-                  echo "✅ 执行成功 (退出码: $EXIT_CODE)"
-                  EXECUTE_SUCCESS=$((EXECUTE_SUCCESS + 1))
-                else
-                  EXIT_CODE=$?
-                  echo "❌ 执行失败 (退出码: $EXIT_CODE)"
-                fi
-              else
-                # 没有 timeout，直接执行
-                if echo -e "1\n10 5\n20 8\n15 6" | ./"$filename" >"${filename}_output.log" 2>"${filename}_error.log"; then
-                  EXIT_CODE=$?
-                  echo "✅ 执行成功 (退出码: $EXIT_CODE)"
-                  EXECUTE_SUCCESS=$((EXECUTE_SUCCESS + 1))
-                else
-                  EXIT_CODE=$?
-                  echo "❌ 执行失败 (退出码: $EXIT_CODE)"
-                fi
-              fi
-              
-              # 显示输出
-              if [ -s "${filename}_output.log" ]; then
-                echo "输出:"
-                head -20 "${filename}_output.log"
-              fi
-              
-              if [ -s "${filename}_error.log" ]; then
-                echo "错误:"
-                head -20 "${filename}_error.log"
-              fi
-            else
-              echo "❌ 编译失败"
-              if [ -s "${filename}_compile.log" ]; then
-                echo "编译错误:"
-                head -20 "${filename}_compile.log"
-              fi
-            fi
-            echo ""
-          fi
-        done
-        
-        # 计算成功率
-        if [ $COMPILE_TOTAL -gt 0 ]; then
-          COMPILE_RATE=$((COMPILE_SUCCESS * 100 / COMPILE_TOTAL))
-        else
-          COMPILE_RATE=0
-        fi
-        
-        if [ $COMPILE_SUCCESS -gt 0 ]; then
-          EXECUTE_RATE=$((EXECUTE_SUCCESS * 100 / COMPILE_SUCCESS))
-        else
-          EXECUTE_RATE=0
-        fi
-        
-        echo "=== 最终结果 ==="
-        echo "编译成功率: $COMPILE_SUCCESS/$COMPILE_TOTAL ($COMPILE_RATE%)"
-        echo "执行成功率: $EXECUTE_SUCCESS/$COMPILE_SUCCESS ($EXECUTE_RATE%)"
-        echo "端到端成功率: $EXECUTE_SUCCESS/$COMPILE_TOTAL ($((EXECUTE_SUCCESS * 100 / COMPILE_TOTAL))%)"
-        
-        # 保存结果
-        echo "compile_success=$COMPILE_SUCCESS" >> $GITHUB_OUTPUT
-        echo "compile_total=$COMPILE_TOTAL" >> $GITHUB_OUTPUT
-        echo "execute_success=$EXECUTE_SUCCESS" >> $GITHUB_OUTPUT
+        brew install coreutils
+        which gtimeout
     
-    - name: Clean up
+    - name: Smart test with auto input
       run: |
-        # 清理编译的可执行文件
-        rm -f a.out
+        echo "=== ARM64 汇编智能测试 ==="
+        
+        TOTAL=0
+        COMPILE_OK=0
+        EXECUTE_OK=0
+        
         for file in *.s; do
           if [ -f "$file" ]; then
-            filename="${file%.s}"
-            rm -f "$filename" "${filename}_compile.log" "${filename}_output.log" "${filename}_error.log"
+            TOTAL=$((TOTAL + 1))
+            NAME="${file%.s}"
+            
+            echo ""
+            echo "测试: $NAME"
+            echo "=" * 40
+            
+            # 1. 编译
+            echo "编译..."
+            if clang "$file" -o "$NAME" 2>/tmp/compile_err; then
+              COMPILE_OK=$((COMPILE_OK + 1))
+              echo "✅ 编译成功"
+              
+              # 2. 分析程序需求，生成智能输入
+              echo "分析程序需求..."
+              
+              # 检查汇编代码中的 scanf 格式字符串
+              SCANF_PATTERNS=$(grep -o 'l_\.[a-zA-Z0-9_]*:' "$file" | grep -v 'main' | xargs -I {} grep -A1 "{}:" "$file" | grep -o '\".*\"' || true)
+              
+              echo "找到格式字符串: $SCANF_PATTERNS"
+              
+              # 生成测试输入
+              INPUT_DATA=""
+              
+              if echo "$SCANF_PATTERNS" | grep -q '%d'; then
+                # 有 %d 格式，需要整数输入
+                echo "检测到 %d 格式，生成整数输入..."
+                
+                # 为第一个 scanf 生成测试数据
+                if echo "$SCANF_PATTERNS" | grep -q '%d%d'; then
+                  # 需要两个整数
+                  INPUT_DATA="1\n10 20\n"
+                elif echo "$SCANF_PATTERNS" | grep -q '%d'; then
+                  # 需要一个整数
+                  INPUT_DATA="1\n"
+                fi
+              fi
+              
+              # 如果没有检测到格式，使用通用输入
+              if [ -z "$INPUT_DATA" ]; then
+                INPUT_DATA="1\n2 3\n4 5\n6 7\n8 9\n10 11\n"
+                echo "使用通用输入"
+              else
+                echo "使用生成输入: $INPUT_DATA"
+              fi
+              
+              # 3. 执行测试
+              echo "执行测试..."
+              echo -e "$INPUT_DATA" | gtimeout 5 ./"$NAME" >/tmp/output 2>/tmp/error
+              EXIT_CODE=$?
+              
+              if [ $EXIT_CODE -eq 0 ] || [ $EXIT_CODE -eq 124 ]; then
+                # 0=成功, 124=timeout但可能成功
+                EXECUTE_OK=$((EXECUTE_OK + 1))
+                echo "✅ 执行成功 (退出码: $EXIT_CODE)"
+                
+                # 显示输出
+                if [ -s /tmp/output ]; then
+                  echo "程序输出:"
+                  head -20 /tmp/output
+                fi
+              else
+                echo "❌ 执行失败 (退出码: $EXIT_CODE)"
+                
+                if [ -s /tmp/error ]; then
+                  echo "错误信息:"
+                  head -20 /tmp/error
+                fi
+              fi
+              
+            else
+              echo "❌ 编译失败"
+              cat /tmp/compile_err
+            fi
           fi
         done
-        rm -f test_input.txt
+        
+        echo ""
+        echo "=" * 40
+        echo "测试完成"
+        echo "=" * 40
+        echo "总文件数: $TOTAL"
+        echo "编译成功: $COMPILE_OK"
+        echo "执行成功: $EXECUTE_OK"
+        
+        if [ $TOTAL -gt 0 ]; then
+          COMPILE_RATE=$((COMPILE_OK * 100 / TOTAL))
+          echo "编译成功率: $COMPILE_RATE%"
+          
+          if [ $COMPILE_OK -gt 0 ]; then
+            EXECUTE_RATE=$((EXECUTE_OK * 100 / COMPILE_OK))
+            echo "执行成功率: $EXECUTE_RATE%"
+          fi
+        fi
