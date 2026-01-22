@@ -1,9 +1,10 @@
-name: Test ARM64 Assembly (With Export)
+# .github/workflows/test-arm64-simple-export.yml
+name: Test ARM64 Assembly (Simple Export)
 
 on: [push, workflow_dispatch]
 
 jobs:
-  test-arm64-export:
+  test-arm64-simple:
     runs-on: macos-latest
     
     steps:
@@ -15,18 +16,16 @@ jobs:
         brew install coreutils
         which gtimeout
     
-    - name: Test and export successful files
+    - name: Test and save successful files
       run: |
-        echo "=== ARM64 汇编测试（带导出功能）==="
+        echo "=== ARM64 汇编测试（简单导出）==="
         
         # 创建输出目录
-        mkdir -p test_results/successful_files
-        mkdir -p test_results/compiled_binaries
+        mkdir -p successful_files
         
         TOTAL=0
         COMPILE_OK=0
         EXECUTE_OK=0
-        SUCCESS_LIST=""
         
         for file in *.s; do
           if [ -f "$file" ]; then
@@ -39,7 +38,7 @@ jobs:
             
             # 1. 编译
             echo "编译..."
-            if clang "$file" -o "$NAME" 2>/tmp/compile_err; then
+            if clang "$file" -o "$NAME" 2>/dev/null; then
               COMPILE_OK=$((COMPILE_OK + 1))
               echo "✅ 编译成功"
               
@@ -57,9 +56,9 @@ jobs:
               
               if [ "$SCANF_CALLS" -gt 0 ]; then
                 if echo "$STRINGS" | grep -q "%d%d"; then
-                  INPUT_DATA="1\n10 20\n"
+                  INPUT_DATA="10 20\n"
                 elif echo "$STRINGS" | grep -q "%d"; then
-                  INPUT_DATA="1\n42\n"
+                  INPUT_DATA="42\n"
                 elif echo "$STRINGS" | grep -q "%s"; then
                   INPUT_DATA="test\n"
                 elif echo "$STRINGS" | grep -q "%f"; then
@@ -74,48 +73,28 @@ jobs:
               
               if [ -z "$INPUT_DATA" ]; then
                 # 没有输入的程序
-                if gtimeout 5 ./"$NAME" >/tmp/output 2>/tmp/error; then
-                  EXIT_CODE=$?
+                if gtimeout 5 ./"$NAME" >/dev/null 2>&1; then
                   EXECUTE_OK=$((EXECUTE_OK + 1))
-                  echo "✅ 执行成功 (退出码: $EXIT_CODE)"
+                  echo "✅ 执行成功"
                   
-                  # 记录成功文件
-                  SUCCESS_LIST="${SUCCESS_LIST}${EXECUTE_OK}:${NAME}\n"
-                  
-                  # 复制成功文件
-                  cp "$file" "test_results/successful_files/${EXECUTE_OK}_${NAME}.s"
-                  cp "./$NAME" "test_results/compiled_binaries/${EXECUTE_OK}_${NAME}"
+                  # 保存成功文件
+                  cp "$file" "successful_files/${EXECUTE_OK}_${NAME}.s"
                   echo "📁 已保存: ${EXECUTE_OK}_${NAME}.s"
-                  
                 else
-                  EXIT_CODE=$?
-                  echo "❌ 执行失败 (退出码: $EXIT_CODE)"
+                  echo "❌ 执行失败"
                 fi
               else
                 # 有输入的程序
-                if echo -e "$INPUT_DATA" | gtimeout 5 ./"$NAME" >/tmp/output 2>/tmp/error; then
-                  EXIT_CODE=$?
+                if echo -e "$INPUT_DATA" | gtimeout 5 ./"$NAME" >/dev/null 2>&1; then
                   EXECUTE_OK=$((EXECUTE_OK + 1))
-                  echo "✅ 执行成功 (退出码: $EXIT_CODE)"
+                  echo "✅ 执行成功"
                   
-                  # 记录成功文件
-                  SUCCESS_LIST="${SUCCESS_LIST}${EXECUTE_OK}:${NAME}\n"
-                  
-                  # 复制成功文件
-                  cp "$file" "test_results/successful_files/${EXECUTE_OK}_${NAME}.s"
-                  cp "./$NAME" "test_results/compiled_binaries/${EXECUTE_OK}_${NAME}"
+                  # 保存成功文件
+                  cp "$file" "successful_files/${EXECUTE_OK}_${NAME}.s"
                   echo "📁 已保存: ${EXECUTE_OK}_${NAME}.s"
-                  
                 else
-                  EXIT_CODE=$?
-                  echo "❌ 执行失败 (退出码: $EXIT_CODE)"
+                  echo "❌ 执行失败"
                 fi
-              fi
-              
-              # 显示输出
-              if [ -s /tmp/output ]; then
-                echo "程序输出:"
-                head -5 /tmp/output
               fi
               
             else
@@ -124,49 +103,6 @@ jobs:
           fi
         done
         
-        # 生成成功文件列表
-        echo -e "$SUCCESS_LIST" > test_results/success_list.txt
-        
-        # 生成测试报告
-        cat > test_results/test_report.md << EOF
-# ARM64 汇编测试报告
-
-## 测试统计
-- 总文件数: $TOTAL
-- 编译成功: $COMPILE_OK
-- 执行成功: $EXECUTE_OK
-
-## 成功率
-- 编译成功率: $((COMPILE_OK * 100 / TOTAL))%
-- 执行成功率: $((EXECUTE_OK * 100 / COMPILE_OK))%
-- 端到端成功率: $((EXECUTE_OK * 100 / TOTAL))%
-
-## 成功文件列表
-EOF
-        
-        if [ -n "$SUCCESS_LIST" ]; then
-          echo -e "$SUCCESS_LIST" | while IFS=: read -r num name; do
-            if [ -n "$num" ]; then
-              echo "- $num: $name" >> test_results/test_report.md
-            fi
-          done
-        else
-          echo "无成功文件" >> test_results/test_report.md
-        fi
-        
-        cat >> test_results/test_report.md << EOF
-
-## 文件说明
-- 成功文件保存在: \`successful_files/\` 目录
-- 编译后的二进制文件保存在: \`compiled_binaries/\` 目录
-- 文件命名格式: \`编号_原文件名.s\`
-
-## 环境信息
-- 系统: macOS $(sw_vers -productVersion)
-- 编译器: $(clang --version | head -1)
-- 测试时间: $(date)
-EOF
-        
         echo ""
         echo "========================================"
         echo "测试完成"
@@ -174,40 +110,25 @@ EOF
         echo "总文件数: $TOTAL"
         echo "编译成功: $COMPILE_OK"
         echo "执行成功: $EXECUTE_OK"
-        echo ""
-        echo "📁 成功文件已保存到 test_results/"
-        echo "📋 成功文件列表:"
-        if [ -n "$SUCCESS_LIST" ]; then
-          echo -e "$SUCCESS_LIST"
-        else
-          echo "无成功文件"
+        
+        if [ $TOTAL -gt 0 ]; then
+          COMPILE_RATE=$((COMPILE_OK * 100 / TOTAL))
+          echo "编译成功率: $COMPILE_RATE%"
+          
+          if [ $COMPILE_OK -gt 0 ]; then
+            EXECUTE_RATE=$((EXECUTE_OK * 100 / COMPILE_OK))
+            echo "执行成功率: $EXECUTE_RATE%"
+          fi
         fi
+        
+        # 显示保存的文件列表
+        echo ""
+        echo "📁 成功文件列表:"
+        ls -la successful_files/ || echo "无成功文件"
     
     - name: Upload successful files
       uses: actions/upload-artifact@v4
       with:
         name: successful-arm64-files
-        path: |
-          test_results/
-        retention-days: 30
-    
-    - name: Upload individual artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: successful-sources
-        path: test_results/successful_files/
-        retention-days: 30
-    
-    - name: Upload compiled binaries
-      uses: actions/upload-artifact@v4
-      with:
-        name: compiled-binaries
-        path: test_results/compiled_binaries/
-        retention-days: 30
-    
-    - name: Upload test report
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-report
-        path: test_results/test_report.md
+        path: successful_files/
         retention-days: 30
