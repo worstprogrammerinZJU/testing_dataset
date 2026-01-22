@@ -1,0 +1,119 @@
+# .github/workflows/test-arm-simple.yml
+name: Test ARM Assembly (Simple)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-arm:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup
+      run: |
+        brew install qemu
+        clang --version
+        qemu-aarch64 --version
+    
+    - name: Find and compile ARM files
+      id: compile
+      run: |
+        echo "=== 编译 ARM 汇编 ==="
+        mkdir -p build/bin
+        
+        COMPILE_SUCCESS=0
+        COMPILE_TOTAL=0
+        
+        for asm_file in $(find . -name "*.s" | sort); do
+          if [ -f "$asm_file" ]; then
+            COMPILE_TOTAL=$((COMPILE_TOTAL + 1))
+            filename=$(basename "$asm_file" .s)
+            
+            echo "编译: $filename"
+            if clang -target arm64-apple-darwin -nostdlib "$asm_file" -o "build/bin/$filename" 2>/dev/null; then
+              echo "✅ 成功"
+              COMPILE_SUCCESS=$((COMPILE_SUCCESS + 1))
+            else
+              echo "❌ 失败"
+            fi
+          fi
+        done
+        
+        # 计算成功率
+        if [ $COMPILE_TOTAL -gt 0 ]; then
+          COMPILE_RATE=$((COMPILE_SUCCESS * 100 / COMPILE_TOTAL))
+        else
+          COMPILE_RATE=0
+        fi
+        
+        echo "编译结果: $COMPILE_SUCCESS/$COMPILE_TOTAL ($COMPILE_RATE%)"
+        echo "compile_success=$COMPILE_SUCCESS" >> $GITHUB_OUTPUT
+        echo "compile_total=$COMPILE_TOTAL" >> $GITHUB_OUTPUT
+        echo "compile_rate=$COMPILE_RATE" >> $GITHUB_OUTPUT
+    
+    - name: Execute compiled binaries
+      id: execute
+      run: |
+        echo "=== 执行 ARM 程序 ==="
+        
+        EXECUTE_SUCCESS=0
+        EXECUTE_TOTAL=0
+        
+        for bin_file in $(find build/bin -type f -perm +111 | sort); do
+          if [ -f "$bin_file" ]; then
+            EXECUTE_TOTAL=$((EXECUTE_TOTAL + 1))
+            filename=$(basename "$bin_file")
+            
+            echo "执行: $filename"
+            if timeout 5s qemu-aarch64 "$bin_file" >/dev/null 2>&1; then
+              echo "✅ 成功"
+              EXECUTE_SUCCESS=$((EXECUTE_SUCCESS + 1))
+            else
+              echo "❌ 失败"
+            fi
+          fi
+        done
+        
+        # 计算成功率
+        if [ $EXECUTE_TOTAL -gt 0 ]; then
+          EXECUTE_RATE=$((EXECUTE_SUCCESS * 100 / EXECUTE_TOTAL))
+        else
+          EXECUTE_RATE=0
+        fi
+        
+        echo "执行结果: $EXECUTE_SUCCESS/$EXECUTE_TOTAL ($EXECUTE_RATE%)"
+        echo "execute_success=$EXECUTE_SUCCESS" >> $GITHUB_OUTPUT
+        echo "execute_total=$EXECUTE_TOTAL" >> $GITHUB_OUTPUT
+        echo "execute_rate=$EXECUTE_RATE" >> $GITHUB_OUTPUT
+    
+    - name: Calculate overall stats
+      run: |
+        echo "=== 最终统计 ==="
+        echo ""
+        echo "编译成功率: ${{ steps.compile.outputs.compile_success }}/${{ steps.compile.outputs.compile_total }} (${{ steps.compile.outputs.compile_rate }}%)"
+        echo "执行成功率: ${{ steps.execute.outputs.execute_success }}/${{ steps.execute.outputs.execute_total }} (${{ steps.execute.outputs.execute_rate }}%)"
+        
+        # 计算端到端成功率
+        COMPILE_TOTAL="${{ steps.compile.outputs.compile_total }}"
+        EXECUTE_SUCCESS="${{ steps.execute.outputs.execute_success }}"
+        
+        if [ "$COMPILE_TOTAL" -gt 0 ]; then
+          OVERALL_RATE=$((EXECUTE_SUCCESS * 100 / COMPILE_TOTAL))
+          echo "端到端成功率: $EXECUTE_SUCCESS/$COMPILE_TOTAL ($OVERALL_RATE%)"
+        else
+          echo "端到端成功率: 0/0 (0%)"
+        fi
+    
+    - name: Upload binaries
+      uses: actions/upload-artifact@v4
+      with:
+        name: arm-binaries
+        path: build/bin/
+        retention-days: 7
