@@ -1,40 +1,195 @@
-To convert the given x86 assembly code to ARM assembly, we need to translate each instruction and handle any differences between x86 and ARM architectures. Here's the equivalent ARM assembly code:
-
-```arm
-.section .rodata
-str "Hello, World!"
-str "\n"
-
-.section .text
-.global _start
-
-_start:
-    # Load arguments from stack
-    ldr r0, [sp, #8]      # Load argument 1 (integer)
-    ldr r1, [sp, #12]     # Load argument 2 (integer)
-
-    # Convert integer to string using printf
-    mov r2, #4            # Format specifier for an integer
-    mov r3, str             # String containing the format specifier
-    mov r4, r0             # Integer to print
-    bl printf           # Call printf with arguments
-
-    # Print newline character
-    mov r2, #1            # Format specifier for a newline
-    mov r3, str             # String containing the newline
-    mov r4, #0             # No argument
-    bl printf           # Call printf with arguments
-
-    # Exit the program
-    mov r7, #10           # System call number for exit
-    mov r0, #0            # Return value 0
-    swi #0               # Make system call
-```
-
-### Explanation:
-1. **String Literals**: In ARM assembly, strings are stored as byte arrays. The `str` section is used to define these strings.
-2. **Argument Loading**: The arguments are loaded from the stack. The first argument (`%r0`) is loaded from `[sp, #8]`, and the second argument (`%r1`) is loaded from `[sp, #12]`.
-3. **Printf**: The `printf` function is called with the format specifier `%d` to print an integer. The format specifier is passed in `%r2`, the string containing the format specifier is passed in `%r3`, and the integer to be printed is passed in `%r4`.
-4. **Newline**: A newline character is printed using the same `printf` function with the format specifier `%d` and the string containing the newline.
-
-This ARM assembly code performs the same operations as the original x86 code but is written for ARM architecture.
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #32
+	.cfi_def_cfa_offset 32
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	w8, #6
+	str	w8, [sp, #8]                    ; 4-byte Folded Spill
+	mov	x9, sp
+	sub	x8, x29, #4
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldr	w8, [sp, #8]                    ; 4-byte Folded Reload
+	ldur	w9, [x29, #-4]
+	mul	w8, w8, w9
+	mov	w9, #3
+	mul	w0, w8, w9
+	b	LBB0_1
+LBB0_1:
+	ldur	w8, [x29, #-4]
+	subs	w8, w8, #6
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_9
+	b	LBB0_2
+LBB0_2:
+	ldr	w9, [sp, #8]                    ; 4-byte Folded Reload
+	mov	w8, #6
+	str	w8, [sp, #12]                   ; 4-byte Folded Spill
+	mul	w8, w8, w9
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_4
+	b	LBB0_3
+LBB0_3:
+	ldr	w8, [sp, #8]                    ; 4-byte Folded Reload
+	ldur	w9, [x29, #-4]
+	mul	w8, w8, w9
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #2
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_4
+LBB0_4:
+	ldr	w9, [sp, #12]                   ; 4-byte Folded Reload
+	mov	w8, #6
+	stur	w8, [x29, #-4]
+	mov	w8, #3
+	stur	w8, [x29, #-8]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_printf
+	mov	w0, #0
+	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #32
+	ret
+LBB0_5:
+	mov	w8, #5
+	mov	w9, #1
+	stur	w9, [x29, #-8]
+	ldur	w9, [x29, #-4]
+	mul	w8, w8, w9
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #2
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:
+	ldur	w8, [x29, #-4]
+	mul	w8, w8, w9
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_7
+LBB0_7:
+	ldur	w9, [x29, #-4]
+	ldur	w8, [x29, #-8]
+	mul	w8, w8, w9
+	subs	w8, w8, #2
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_9
+	b	LBB0_8
+LBB0_8:
+	ldur	w8, [x29, #-8]
+	mul	w8, w8, w9
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_9
+LBB0_9:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w9, [x29, #-8]
+	mov	w8, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_10
+LBB0_10:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w8, [x29, #-8]
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_11
+LBB0_11:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w8, [x29, #-8]
+	mov	w9, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_12
+LBB0_12:
+	ldur	w9, [x29, #-8]
+	ldur	w8, [x29, #-4]
+	mul	w8, w8, w9
+	subs	w8, w8, #2
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_13
+LBB0_13:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w9, [x29, #-8]
+	mov	w8, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_14
+LBB0_14:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w9, [x29, #-8]
+	mov	w8, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_15
+LBB0_15:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w9, [x29, #-8]
+	mov	w8, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_16
+LBB0_16:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w9, [x29, #-8]
+	mov	w8, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_17
+LBB0_17:
+	mov	w8, #6
+	stur	w8, [x29, #-8]
+	ldur	w9, [x29, #-8]
+	mov	w8, #3
+	mul	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_18
+LBB0_18:
+	ldur	w8, [x29, #-8]

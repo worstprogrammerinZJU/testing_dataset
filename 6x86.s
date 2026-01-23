@@ -1,98 +1,145 @@
-Here is the equivalent ARM assembly for the given x86 assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #112
+	.p2align	2
+	str	xzr, [sp, #72]
+	str	xzr, [sp, #80]
+	str	xzr, [sp, #88]
+	str	xzr, [sp, #96]
+	str	xzr, [sp, #104]
+	str	xzr, [sp, #112]
+	str	xzr, [sp, #120]
+	str	xzr, [sp, #128]
+	str	xzr, [sp, #136]
+	str	xzr, [sp, #144]
+	str	xzr, [sp, #152]
+	str	wzr, [sp, #160]
+	b	LBB0_1
+LBB0_1:                                 ; =>This Loop Header: Depth=1
+	mov	w8, #1
+	add	w8, w8, #1
+	subs	w8, w8, #4
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_2
+	b	LBB0_0
+LBB0_2:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_4 Depth 2
+	bl	_gets
+	ldrb	w8, [sp, #16]
+	tbz	w8, #0, LBB0_4
+	b	LBB0_3
+LBB0_3:                                 ;   in Loop: Header=BB0_1 Depth=1
+	b	LBB0_4
+	.p2align	2
+LBB0_5:                                 ;   in Loop: Header=BB0_4 Depth=2
+	ldr	x8, [sp, #16]
+	and	x8, x8, #0xff
+	stur	x8, [x29, #-16]
+	b	LBB0_4
+LBB0_6:                                 ;   in Loop: Header=BB0_4 Depth=2
+	adrp	x8, l_.str.6@PAGE
+	add	x8, x8, l_.str.6@PAGEOFF
+	ldr	x8, [x8]
+	and	x8, x8, #0xff
+	stur	x8, [x29, #-16]
+	b	LBB0_4
+LBB0_7:                                 ;   in Loop: Header=BB0_4 Depth=2
+	adrp	x8, l_.str.7@PAGE
+	add	x8, x8, l_.str.7@PAGEOFF
+	ldr	x8, [x8]
+	and	x8, x8, #0xff
+	stur	x8, [x29, #-16]
+	b	LBB0_4
+LBB0_8:
+	mov	x9, sp
+	str	x8, [x9]
+	mov	x8, #65
+	str	x8, [x9, #8]
+	adrp	x0, l_.str.4@PAGE
+	add	x0, x0, l_.str.4@PAGEOFF
+	bl	_printf
+	mov	w8, #1
+	add	w8, w8, #1
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_9
+LBB0_9:
+	mov	w8, #0
+	add	w8, w8, #1
+	str	w8, [sp]                        ; 4-byte Folded Spill
+	subs	w8, w8, #0
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_10
+LBB0_10:
+	bl	___stack_chk_fail
+LBB0_11:
+	ldr	w0, [sp]                        ; 4-byte Folded Reload
+	add	sp, sp, #112
+	ret
+LBB0_12:
+	bl	___stack_chk_fail
+LBB0_13:
+	mov	w0, #0
+	add	sp, sp, #112
+	ret
+LBB0_14:
+	mov	w0, #1
+	mov	x1, #80
+	adrp	x2, l_.str@PAGE
+	add	x2, x2, l_.str@PAGEOFF
+	adrp	x0, l_.str.4@PAGE
+	add	x0, x0, l_.str.4@PAGEOFF
+	bl	_printf
+	add	sp, sp, #112
+	ret
+LBB0_15:
+	mov	w8, #0
+	mov	w9, #0
+	str	w9, [sp, #4]                    ; 4-byte Folded Spill
+	add	w8, w8, #1
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_17
+	b	LBB0_16
+LBB0_16:
+	mov	w8, #0
+	add	w8, w8, #1
+	str	w8, [sp, #4]                    ; 4-byte Folded Spill
+	subs	w8, w8, #0
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_18
+	b	LBB0_17
+LBB0_17:
+	mov	w0, #0
+	add	sp, sp, #112
+	ret
+LBB0_18:
+	mov	w0, #0
+	add	sp, sp, #112
+	ret
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"* "
 
-```arm
-.global _start
+l_.str.1:                               ; @.str.1
+	.asciz	"  "
 
-_start:
-    push {lr}
-    mov sp, lr
-    sub sp, #200
-    ldr r0, [pc, #0] ! ___stack_chk_guard
-    ldr r0, [r0]
-    str r0, [sp, #-48]
+l_.str.4:                               ; @.str.4
+	.asciz	"%c "
 
-    mov r0, #0
-    xor r14, r14, #0
-    ldr r15, [sp, #-239]
-    ldr r12, [sp, #-240]
+l_str:                                  ; @str
+	.asciz	"Z"
 
-    b .LBB0_1
+l_str.6:                                ; @str.6
+	.asciz	" "
 
-.LBB0_6:
-    incl r14
-    cmp r14, #4
-    beq .LBB0_7
-.LBB0_1:
-    ldr rax, [sp, #-240]
-    bl _gets
-    movzbl rax, [sp, #-240]
-    test rax, rax
-    beq .LBB0_6
+l_str.7:                                ; @str.7
+	.asciz	"*"
 
-.LBB0_2:
-    ldr r15, [sp, #-240]
-    jmp .LBB0_3
-
-.LBB0_5:
-    movzbl [r15], rax
-    inc r15
-    test rax, rax
-    beq .LBB0_6
-.LBB0_3:
-    addb rax, #-65
-    cmp rax, #25
-    ja .LBB0_5
-.LBB0_4:
-    movzbl rax, [r15]
-    incl [sp, #-160, rax, 4]
-    jmp .LBB0_5
-
-.LBB0_7:
-    mov rax, #1
-    mov ebx, [sp, #-160]
-    bl _puts
-    ldr rax, [pc, #0] ! ___stack_chk_guard
-    ldr rax, [rax]
-    cmp rax, [-48, sp]
-    je .LBB0_22
-
-    mov eax, #65
-    ldr r14, [pc, #0] ! .str
-    bl _printf
-    incl eax
-    cmp eax, #90
-    jne .LBB0_19
-    ldr r14, [pc, #0] ! .str
-    bl _puts
-    mov rax, [pc, #0] ! ___stack_chk_guard
-    ldr rax, [rax]
-    cmp rax, [-48, sp]
-    je .LBB0_22
-
-.LBB0_18:
-    mov rax, #65
-    ldr r14, [pc, #0] ! .str
-    bl _printf
-    incl rax
-    cmp rax, #90
-    jne .LBB0_19
-    ldr r14, [pc, #0] ! .str
-    bl _puts
-    mov rax, [pc, #0] ! ___stack_chk_guard
-    ldr rax, [rax]
-    cmp rax, [-48, sp]
-    je .LBB0_22
-
-.LBB0_21:
-    xor rax, rax
-    add rsp, #200
-    pop {lr}
-    bx lr
-
-.LBB0_22:
-    bl _stack_chk_fail
-
-.end
-```
-
-Please note that this is an approximate translation and may need further adjustments based on the actual architecture of the target ARM processor. The assembly code assumes that the `_gets`, `_puts`, and `_printf` functions are defined elsewhere in your program or have been declared as such. Additionally, the stack check guard is assumed to be stored at the address `___stack_chk_guard`.
+.subsections_via_symbols

@@ -1,135 +1,161 @@
-Converting x86 assembly code to ARM assembly is quite complex and requires a deep understanding of both architectures. Here's an attempt to translate your code:
-
-```arm
-.text
-.global _start
-.type _start, @function
-_start:
-    push {lr}
-    mov r12, #0
-    mov r13, #0
-    mov r14, #0
-    mov r15, #0
-
-    /* Read input strings */
-    ldr r0, =L_str
-    bl scanf
-
-    /* Parse the first string */
-    ldr r0, =L_str
-    bl sscanf
-
-    /* Calculate length of the second string */
-    ldr r0, =L_str.1
-    bl strlen
-
-    /* Allocate memory for output */
-    add r1, r14, #4
-    add r2, r14, #4
-    bl malloc
-
-    /* Copy characters from second string to allocated memory */
-    ldr r0, =L_str
-    bl strcpy
-
-    /* Calculate length of the third string */
-    ldr r0, =L_str.1
-    bl strlen
-
-    /* Allocate more memory for output */
-    add r1, r14, #4
-    add r2, r14, #4
-    bl malloc
-
-    /* Copy characters from third string to allocated memory */
-    ldr r0, =L_str
-    bl strcpy
-
-    /* Print the results */
-    ldr r0, =L_str
-    bl printf
-
-    ldr r0, =L_str.1
-    bl printf
-
-    ldr r0, =L_str.1
-    bl printf
-
-    /* Free allocated memory */
-    ldr r0, =malloc
-    bl free
-
-    /* Exit program */
-    mov r0, #0
-    bx lr
-
-/* String manipulation functions */
-.global _strlen
-_type _strlen, @function
-_strlen:
-    ldr r0, [r1]
-    cmp r0, #0
-    beq .end_strlen
-    mov r0, #1
-    add r1, #1
-    b _strlen
-
-.end_strlen:
-    bx lr
-
-.global _strcpy
-_type _strcpy, @function
-_strcpy:
-    ldr r0, [r1]
-    cmp r0, #0
-    beq .end_strcpy
-    str r0, [r2]
-    add r1, #1
-    add r2, #1
-    b _strcpy
-
-.end_strcpy:
-    bx lr
-
-.global _printf
-_type _printf, @function
-_printf:
-    ldr r0, [r1]
-    mov r1, r2
-    mov r2, r3
-    bl puts
-    bx lr
-
-.global _scanf
-_type _scanf, @function
-_scanf:
-    ldr r0, [r1]
-    mov r1, r2
-    mov r2, r3
-    bl gets
-    bx lr
-
-.global malloc
-_type malloc, @function
-_malloc:
-    ldr r0, [r1]
-    mov r1, r2
-    mov r2, r3
-    bl malloc
-    bx lr
-
-.global free
-_type free, @function
-_free:
-    ldr r0, [r1]
-    mov r1, r2
-    mov r2, r3
-    bl free
-    bx lr
-
-.section __DATA,.data
-L_str: .asciz "Hello"
-L_str.1: .asciz "World"
-```
-
-Please note that this translation is very simplified and does not include all details such as handling errors, dynamic memory management (e.g., `calloc` or `realloc`), and optimization. Also, this code assumes that the standard C library functions (`scanf`, `printf`, `strlen`, `strcpy`, `gets`, `malloc`, `free`) are available on the target ARM architecture.
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #64
+	.long	12            lsl #12           ; =49152
+	.long	12             lsl #12           ; =49152
+	.long	12             lsl #12           ; =49152
+	str	w0, [sp, #64]
+	adrp	x10, _s@GOTPAGE
+	ldr	x10, [x10, _s@GOTPAGEOFF]
+	adrp	x8, _c@GOTPAGE
+	ldr	x8, [x8, _c@GOTPAGEOFF]
+	str	x8, [sp, #40]                   ; 8-byte Folded Spill
+	mov	x9, sp
+	str	x10, [x9]
+	str	x8, [x9, #8]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	adds	w8, w0, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_1
+LBB0_1:
+	ldr	x10, [sp, #40]                  ; 8-byte Folded Reload
+	mov	x9, sp
+	str	x10, [x9]
+	str	x8, [x9, #8]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	adds	w8, w0, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_2
+LBB0_2:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_5 Depth 2
+                                        ;       Child Loop BB0_7 Depth 3
+	mov	x9, sp
+	str	d0, [x9]
+	str	d1, [x9, #8]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldr	w8, [sp, #64]
+	add	w8, w8, #8
+	mov	w9, #161604
+	movk	w9, #2, lsl #16
+	str	w9, [sp, #28]                   ; 4-byte Folded Spill
+	subs	w8, w8, w9
+	cset	w8, gt
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_3
+LBB0_3:                                 ;   in Loop: Header=BB0_5 Depth=1
+	ldr	w8, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	mov	w9, #1
+	and	w10, w8, w9
+	ldr	w8, [sp, #64]
+	add	w8, w8, #8
+	mov	w9, #801
+	movk	w9, #2, lsl #16
+	str	w9, [sp, #24]                   ; 4-byte Folded Spill
+	subs	w8, w8, w9
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_4
+LBB0_4:                                 ;   in Loop: Header=BB0_5 Depth=1
+	ldr	w9, [sp, #24]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	str	w8, [sp, #64]
+	ldur	w8, [x9, #1]
+	stur	w8, [x9, #7]
+	b	LBB0_5
+LBB0_5:                                 ;   Parent Loop BB0_5 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	ldr	w8, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	ldr	w9, [sp, #28]                   ; 4-byte Folded Reload
+	and	w8, w8, w9
+	ldrb	w8, [x8]
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:                                 ;   in Loop: Header=BB0_5 Depth=1
+	ldr	w8, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	ldr	w9, [sp, #28]                   ; 4-byte Folded Reload
+	and	w10, w8, w9
+	mov	w8, #801
+	movk	w8, #2, lsl #16
+	str	w8, [sp, #32]                   ; 4-byte Folded Spill
+	subs	w8, w8, w10
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_7
+LBB0_7:                                 ;   in Loop: Header=BB0_5 Depth=1
+	ldr	w8, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	str	w8, [sp, #64]
+	ldur	w8, [x2, #7]
+	stur	w8, [x2, #11]
+	b	LBB0_5
+LBB0_8:                                 ;   Parent Loop BB0_5 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	ldr	w8, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	str	w8, [sp, #64]
+	ldur	w8, [x2, #-8]
+	stur	w8, [x2, #-8]
+	ldur	w9, [x2, #-4]
+	ldur	w8, [x2, #7]
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_9
+LBB0_9:                                 ;   in Loop: Header=BB0_5 Depth=1
+	ldr	w9, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w9, #1
+	str	w8, [sp, #64]
+	ldur	w8, [x2, #-8]
+	stur	w8, [x2, #-8]
+	ldur	w9, [x2, #-4]
+	ldur	w8, [x2, #7]
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_10
+LBB0_10:                                ;   in Loop: Header=BB0_5 Depth=1
+	ldr	w9, [sp, #28]                   ; 4-byte Folded Reload
+	add	w8, w9, #1
+	str	w8, [sp, #64]
+	ldur	w8, [x2, #7]
+	stur	w8, [x2, #-8]
+	b	LBB0_5
+LBB0_11:                                ;   Parent Loop BB0_5 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	ldur	w8, [x2, #-8]
+	stur	w8, [x2, #-8]
+	ldur	w8, [x2, #-4]
+	stur	w8, [x2, #-4]
+	ldur	w8, [x2, #7]
+	subs	w8, w8, #2
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_12
+LBB0_12:                                ;   in Loop: Header=BB0_5 Depth=1
+	ldur	w8, [x2, #-8]
+	stur	w8, [x2, #-8]
+	ldur	w8, [x2, #-4]
+	stur	w8, [x2, #-4]
+	ldur	w8, [x2, #7]
+	subs	w8, w8, #2
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_11
+LBB0_13:                                ;   in Loop

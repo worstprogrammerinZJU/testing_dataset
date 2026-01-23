@@ -1,41 +1,44 @@
-Here is the equivalent ARM assembly for your x86 assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #48
+	.cfi_def_cfa_offset 48
+	stp	x29, x30, [sp, #32]             ; 16-byte Folded Spill
+	add	x29, sp, #32
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	sub	x8, x29, #8
+	str	x8, [x9]
+	sub	x8, x29, #4
+	str	x8, [x9, #8]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldur	w8, [x29, #-4]
+	ldur	w9, [x29, #-8]
+	add	w10, w8, w9
+	mov	x9, sp
+                                        ; implicit-def: $x8
+	mov	x8, x10
+	str	x8, [x9]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_printf
+	mov	w0, #0
+	ldp	x29, x30, [sp, #32]             ; 16-byte Folded Reload
+	add	sp, sp, #48
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d %d"
 
-```arm
-    .section __text,.text,axr,noat
-    .global _start
+l_.str.1:                               ; @.str.1
+	.asciz	"%d\n"
 
-_start:
-    mov r7, #0            @ Clear flags
-    ldr r0, =_input        @ Load input address into r0
-    bl scanf              @ Call scanf with arguments from stack
-
-    mov r0, #0            @ Clear flags
-    ldr r0, =_output       @ Load output address into r0
-    bl printf             @ Call printf with arguments from stack
-
-    mov r0, #0            @ Return from main
-
-_input:                                @ Input label
-    ldr r3, [r0]           @ Read integer from r0 and store in r3
-    str r3, [r0, #4]         @ Store integer in r3 to address +4 of r0
-
-_output:                               @ Output label
-    ldr r3, [r0]           @ Read integer from r0 and store in r3
-    mov r4, #10           @ Print integer as decimal
-    mul r4, r3, r4          @ Multiply r4 (base) by r3 (number)
-    add r4, r4, r3          @ Add r3 to r4 (result)
-    str r4, [r0, #8]         @ Store result in address +8 of r0
-    mov r3, #'\n'          @ Move newline character to r3
-    str r3, [r0, #12]         @ Store newline character in address +12 of r0
-    b _end                 @ Branch to end label
-
-_end:
-    mov r0, #0            @ Return from main
-    bx lr               @ Exit program
-```
-
-Please note that this is an example implementation assuming that the `scanf` and `printf` functions are defined in a library that can be called from ARM assembly. Also, it's assumed that `stdin` and `stdout` are being used for input and output respectively. 
-
-This code assumes that `scanf` takes two integers as input and prints their sum on stdout. It also assumes that `printf` takes two integers as input and prints them on stdout followed by a newline.
-
-Make sure that you have the necessary libraries linked in your ARM environment before compiling this code.
+.subsections_via_symbols

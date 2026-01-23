@@ -1,58 +1,96 @@
-To convert the given x86 assembly code to ARM assembly, we need to understand the differences between the two architectures and how their instruction sets work. Here's the equivalent ARM assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #80
+	.cfi_def_cfa_offset 80
+	stp	x29, x30, [sp, #64]             ; 16-byte Folded Spill
+	add	x29, sp, #64
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	add	x8, sp, #16
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldr	w8, [sp, #16]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_1
+LBB0_1:
+	mov	x9, sp
+	add	x8, sp, #12
+	str	x8, [x9]
+	adrp	x8, l_.str.3@PAGE
+	add	x8, x8, l_.str.3@PAGEOFF
+	str	x8, [x9, #8]
+	adrp	x8, l_.str.4@PAGE
+	add	x8, x8, l_.str.4@PAGEOFF
+	str	x8, [x9, #16]
+	mov	w8, #0
+	stur	w8, [x29, #-20]                 ; 4-byte Folded Spill
+	mov	x2, x8
+	adrp	x0, l_.str.2@PAGE
+	add	x0, x0, l_.str.2@PAGEOFF
+	bl	_scanf
+	ldur	w1, [x29, #-20]                 ; 4-byte Folded Reload
+	mov	x0, #7088
+	movk	x0, #7088, lsl #16
+	bl	_printf
+	ldur	w9, [x29, #-20]                 ; 4-byte Folded Reload
+	ldr	w10, [sp, #12]
+	ldr	w8, [sp, #16]
+	mul	w8, w8, w10
+	str	w8, [sp, #16]
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_2
+LBB0_2:
+	ldur	w1, [x29, #-20]                 ; 4-byte Folded Reload
+	mov	x9, sp
+	add	x8, sp, #20
+	str	x8, [x9]
+	adrp	x8, l_.str.3@PAGE
+	add	x8, x8, l_.str.3@PAGEOFF
+	str	x8, [x9, #8]
+	mov	x8, #7088
+	movk	x8, #7088, lsl #16
+	str	x8, [x9, #16]
+	mov	x0, #7088
+	movk	x0, #7088, lsl #16
+	bl	_printf
+	mov	w0, #10
+	bl	_putchar
+	ldr	w8, [sp, #12]
+	ldur	w9, [x29, #-20]                 ; 4-byte Folded Reload
+	subs	w8, w8, w9
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_2
+	b	LBB0_3
+LBB0_3:
+	mov	w0, #0
+	ldp	x29, x30, [sp, #64]             ; 16-byte Folded Reload
+	add	sp, sp, #80
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-.global _start
-.text
-.bss
-.align 2
-.scnlen = . - _start
-_start:
-    mov r0, #1                  ; System call number (open)
-    ldr r1, [._filename]        ; File name
-    mov r2, #O_RDONLY            ; Open for reading
-    swi 0                       ; Make system call
+l_.str.1:                               ; @.str.1
+	.asciz	"%d%d"
 
-    cmp r0, #-1                 ; Check if file was opened successfully
-    beq error                    ; Jump to error block if not
+l_.str.2:                               ; @.str.2
+	.asciz	"Scenario #%d:\n"
 
-    mov r0, #2                  ; System call number (read)
-    mov r1, r0                  ; File descriptor from open
-    ldr r2, [._buffer]          ; Buffer to read into
-    ldr r3, [._size]           ; Size of buffer
-    swi 0                       ; Make system call
+l_.str.3:                               ; @.str.3
+	.asciz	"%d.00\n"
 
-    cmp r0, #-1                 ; Check if read was successful
-    beq error                    ; Jump to error block if not
+l_.str.4:                               ; @.str.4
+	.asciz	"%d.41\n"
 
-    mov r0, #3                  ; System call number (close)
-    mov r1, r0                  ; File descriptor from open
-    swi 0                       ; Make system call
-
-error:
-    mov r7, #1                   ; System call number (exit)
-    mov r0, #1                   ; Exit status
-    swi 0                       ; Make system call
-```
-
-### Explanation:
-1. **System Call Number**:
-   - `mov r0, #1` - Opens the file.
-   - `mov r0, #2` - Reads data from the file.
-   - `mov r0, #3` - Closes the file.
-
-2. **File Descriptor**:
-   - The return value from an open syscall is used as the file descriptor in subsequent syscalls.
-
-3. **Buffer and Size**:
-   - `ldr r2, [._buffer]` - Loads the buffer address.
-   - `ldr r3, [._size]` - Loads the size of the buffer.
-
-4. **Error Handling**:
-   - `cmp r0, #-1` - Checks if the system call returned an error.
-   - `beq error` - If an error occurred, jumps to the error label.
-
-5. **Exit**:
-   - `mov r7, #1` - Sets the system call number to exit.
-   - `mov r0, #1` - Sets the exit status to 1 (indicating an error).
-
-This ARM code performs similar tasks as the original x86 code but uses different registers and system calls for each operation.
+.subsections_via_symbols

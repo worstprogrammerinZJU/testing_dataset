@@ -1,70 +1,143 @@
-Certainly! Below is the equivalent ARM assembly code for the given x86 assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #96
+	.cset	w8, ___stack_chk_guard@GOTPAGE
+	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
+	ldr	x8, [x8]
+	stur	x8, [x29, #-8]
+	mov	x9, sp
+	add	x8, sp, #28
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldr	w8, [sp, #28]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_1
+LBB0_1:
+	mov	x9, sp
+	adrp	x8, l_.str.1@PAGE
+	add	x8, x8, l_.str.1@PAGEOFF
+	str	x8, [x9]
+	mov	x8, #1677
+	str	x8, [sp, #16]                   ; 8-byte Folded Spill
+	str	x8, [x9, #8]
+	adrp	x0, l_.str.2@PAGE
+	add	x0, x0, l_.str.2@PAGEOFF
+	bl	_bzero
+	ldr	x8, [sp, #16]                   ; 8-byte Folded Reload
+	ldr	w9, [sp, #28]
+	subs	w8, w8, w9
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_2
+LBB0_2:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_4 Depth 2
+	mov	w8, #0
+	and	w10, w8, #0x1
+	mov	x9, sp
+                                        ; implicit-def: $x8
+	mov	x8, x10
+	str	x8, [x9]
+	adrp	x0, l_.str.4@PAGE
+	add	x0, x0, l_.str.4@PAGEOFF
+	bl	_scanf
+	ldr	x8, [sp, #16]                   ; 8-byte Folded Reload
+	ldr	w9, [sp, #28]
+                                        ; implicit-def: $x8
+	mov	x8, x9
+	mov	x9, sp
+	str	x8, [x9]
+	mov	x0, #1677
+	bl	_printf
+	ldr	x8, [sp, #16]                   ; 8-byte Folded Reload
+	add	x9, x8, #4
+	subs	x9, x9, #16
+	cset	w9, ne
+	tbnz	w9, #0, LBB0_4
+	b	LBB0_3
+LBB0_3:                                 ; =>Loop: Header=BB0_4 Depth=1
+	ldr	w8, [sp, #28]
+	ldur	w9, [x29, #-24]
+	sdiv	w8, w8, w9
+	ldur	w9, [x29, #-20]
+	subs	w9, w9, w10
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_4
+LBB0_4:                                 ; =>Loop: Header=BB0_4 Depth=1
+	ldur	w8, [x29, #-24]
+	ldur	w9, [x29, #-20]
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_5
+LBB0_5:                                 ; =>Loop: Header=BB0_4 Depth=1
+	ldur	w8, [x29, #-24]
+	ldur	w9, [x29, #-20]
+	sdiv	w8, w8, w9
+	str	w8, [sp, #12]                   ; 4-byte Folded Spill
+	ldur	w8, [x29, #-16]
+	subs	w8, w8, #0
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:                                 ; =>Loop: Header=BB0_4 Depth=1
+	ldur	w8, [x29, #-20]
+	ldur	w9, [x29, #-16]
+	sdiv	w8, w8, w9
+	ldur	w9, [x29, #-12]
+	subs	w9, w9, w8
+	ldur	w8, [x29, #-16]
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_7
+LBB0_7:                                 ; =>Loop: Header=BB0_4 Depth=1
+	ldur	w8, [x29, #-20]
+	ldur	w9, [x29, #-24]
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_8
+LBB0_8:                                 ; =>Loop: Header=BB0_4 Depth=1
+	ldur	w8, [x29, #-16]
+	ldur	w9, [x29, #-20]
+	sdiv	w8, w8, w9
+	str	w8, [sp, #8]                    ; 4-byte Folded Spill
+	ldur	w8, [x29, #-12]
+	subs	w8, w8, #0
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_9
+LBB0_9:                                 ; =>Loop: Header=BB0_4 Depth=1
+	bl	___stack_chk_fail
+LBB0_10:
+	ldr	w0, [sp, #8]                    ; 4-byte Folded Reload
+	mov	w1, #0
+	mov	w2, #0
+	bl	_memset
+	sub	sp, sp, #96
+	add	sp, sp, #96
+	ret
+LBB0_11:
+	bl	___stack_chk_fail
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-.global _start
+l_.str.1:                               ; @.str.1
+	.asciz	"%d "
 
-_start:
-    push {fp}
-    mov sp, fp
-    push {lr}
+l_.str.2:                               ; @.str.2
+	.asciz	"%d\n"
 
-    mov r0, #0      ; Initialize return address
-    bl printf         ; Print "Hello World!\n"
-    mov r0, #4       ; Number of arguments (1)
-    ldr r1, =hello_str      ; Address of string to print
-    bl scanf         ; Read integer from user
-    cmp r0, #0       ; Check if read was successful
-    b.le exit        ; If not, jump to exit
-
-    sub sp, #40       ; Allocate stack space for variables
-    str r0, [sp]     ; Store integer in stack
-    lea r2, [sp, #-40]  ; Load pointer to integer
-
-    mov r0, #4       ; Number of arguments (2)
-    ldr r1, =print_int  ; Address of first format specifier
-    bl printf         ; Print "%d "
-    ldr r0, [r2]     ; Load integer from stack
-    bl printf         ; Print "%d\n"
-
-exit:
-    pop {pc}        ; Return from main
-
-.hello_str:
-    .ascii "Hello World!\n"
-
-.print_int:
-    .ascii "%d "
-```
-
-### Explanation:
-1. **Global Section**: The `_start` label marks the entry point of the program.
-2. **Stack Frame Management**:
-   - `push {fp}` and `mov sp, fp` save the current frame pointer and set it as the new base pointer.
-   - `push {lr}` saves the link register.
-3. **Initial Call to `printf`**:
-   - `mov r0, #0` initializes the return address.
-   - `bl printf` calls the standard library function `printf` with the string `"Hello World!\n"`.
-4. **Read Integer**:
-   - `mov r0, #4` sets the number of arguments.
-   - `ldr r1, =hello_str` loads the address of the string `"Hello World!\n"` into `r1`.
-   - `bl scanf` reads an integer from the user.
-5. **Check Read Success**:
-   - `cmp r0, #0` compares the result with zero.
-   - `b.le exit` jumps to the `exit` label if the read failed.
-6. **Allocate Stack Space**:
-   - `sub sp, #40` allocates 40 bytes on the stack for additional variables.
-   - `str r0, [sp]` stores the integer in the allocated stack space.
-   - `lea r2, [sp, #-40]` loads a pointer to the stored integer.
-7. **Print Integer**:
-   - `mov r0, #4` sets the number of arguments.
-   - `ldr r1, =print_int` loads the address of the format specifier `"%d "`.
-   - `bl printf` prints the integer followed by a space.
-   - `ldr r0, [r2]` loads the integer from the stack.
-   - `bl printf` prints the integer.
-8. **Exit Program**:
-   - `pop {pc}` returns from the `main` function.
-9. **String Literals**:
-   - `.global hello_str` declares `hello_str` as global.
-   - `.ascii "Hello World!\n"` defines the string `"Hello World!\n"` in ASCII format.
-
-This ARM assembly code achieves the same functionality as the original x86 assembly code, reading an integer from the user and printing it along with "Hello World!" to the console.
+.subsections_via_symbols

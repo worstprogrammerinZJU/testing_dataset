@@ -1,92 +1,80 @@
-To convert the given x86 assembly code to ARM assembly, we need to understand the differences between the two architectures and how their instructions work. Below is the equivalent ARM assembly code for the given x86 code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #48
+	.cfi_def_cfa_offset 48
+	stp	x29, x30, [sp, #32]             ; 16-byte Folded Spill
+	add	x29, sp, #32
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	adrp	x8, ___stack_chk_guard@GOTPAGE
+	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
+	ldr	x8, [x8]
+	str	x8, [sp, #8]
+	mov	x9, sp
+	add	x8, sp, #4
+	str	x8, [x9]
+	adrp	x8, l_.str@PAGE
+	add	x8, x8, l_.str@PAGEOFF
+	mov	x0, x8
+	bl	_scanf
+	mov	x0, x8
+	add	x1, sp, #16
+	bl	_scanf
+	adds	w8, w0, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_1
+LBB0_1:
+	mov	x0, x8
+	add	x1, sp, #16
+	b	LBB0_3
+	.p2align	2
+LBB0_2:                                 ;   in Loop: Header=BB0_3 Depth=1
+	mov	x0, x8
+	add	x1, sp, #4
+	bl	_scanf
+	adds	w8, w0, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_3
+LBB0_3:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_5 Depth 2
+	ldrb	w8, [sp, #16]
+	tbz	w8, #0, LBB0_2
+	b	LBB0_4
+LBB0_4:                                 ;   in Loop: Header=BB0_3 Depth=1
+	mov	w8, #0
+	and	w8, w8, #0x1
+	and	w8, w8, #0x1
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_5
+LBB0_5:
+	add	x0, sp, #4
+	bl	_puts
+	ldr	x9, [sp, #8]
+	adrp	x8, ___stack_chk_guard@GOTPAGE
+	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
+	ldr	x8, [x8]
+	subs	x8, x8, x9
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:
+	bl	___stack_chk_fail
+LBB0_7:
+	mov	w0, #0
+	ldp	x29, x30, [sp, #32]             ; 16-byte Folded Reload
+	add	sp, sp, #48
+	ret
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%s"
 
-```arm
-.global _start
-.type _start, @function
-
-_start:
-    push {lr}
-    mov sp, lr
-    sub sp, #32
-    ldr r0, [pc, #12]    @ Get stack guard value from GOTPCREL
-    ldr r1, [r0]
-    mov r1, r1, lsl #24
-    ldr r1, [r1]
-    str r1, [sp, #-24]
-
-    lea r0, [pc, #48]    @ Get first string address from GOTPCREL
-    lea r1, [sp, #-35]
-    mov r2, r0
-    bl scanf
-
-    lea r0, [pc, #48]    @ Get second string address from GOTPCREL
-    lea r1, [sp, #-35]
-    mov r2, r0
-    bl scanf
-
-    cmp r0, #0
-    bne _loop
-
-    lea r0, [pc, #48]    @ Print first string
-    lea r1, [sp, #-35]
-    bl puts
-
-    lea r0, [pc, #48]    @ Print second string
-    lea r1, [sp, #-35]
-    bl puts
-
-    b _end
-
-_loop:
-    lea r0, [sp, #48]    @ Read character from stdin
-    lea r1, [sp, #-35]
-    bl getchar
-    cmp r0, #EOF
-    b eq _exit
-
-    lea r0, [sp, #48]    @ Update second string with read character
-    lea r1, [sp, #-35]
-    mov r2, r0
-    bl putchar
-
-    b _loop
-
-_exit:
-    ldr r0, [pc, #12]    @ Get stack guard value from GOTPCREL
-    ldr r1, [r0]
-    mov r1, r1, lsl #24
-    ldr r1, [r1]
-    str r1, [sp, #-24]
-
-    b _end
-
-_end:
-    pop {pc}
-
-.data
-.stack_chk_guard: .word 0xDEADBEEF
-.str: ".asciz \"%s\""
-```
-
-### Explanation:
-
-1. **Stack Guard**: The stack guard value is loaded from the global offset table (GOT) at a specific address (`___stack_chk_guard@GOTPCREL`). It is then stored on the stack.
-
-2. **Reading Strings**:
-   - Two strings are read from standard input using `scanf`.
-   - The addresses of these strings are passed as arguments to `scanf`.
-
-3. **Loop Reading Characters**:
-   - A loop reads characters from standard input until it encounters EOF.
-   - Each character is read into a buffer at an offset of `-35` relative to the stack pointer.
-   - The character is printed back to standard output using `putchar`.
-
-4. **End of Program**:
-   - The stack guard value is loaded again and stored on the stack.
-   - The program ends with a call to `_end`.
-
-### Note:
-- In ARM assembly, addresses are typically 32-bit, so we use `long` types (`long`, `int`, etc.) instead of `int` for memory accesses.
-- The `printf` function is used to print strings, and `getchar` is used to read characters from standard input.
-
-This ARM assembly code should produce the same behavior as the original x86 code.
+.subsections_via_symbols

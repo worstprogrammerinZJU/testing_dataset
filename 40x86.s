@@ -1,87 +1,74 @@
-Certainly! Below is the equivalent ARM assembly code for the given x86 assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #48
+	.cfi_def_cfa_offset 48
+	stp	x29, x30, [sp, #32]             ; 16-byte Folded Spill
+	add	x29, sp, #32
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	sub	x8, x29, #7
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldur	w8, [x29, #-7]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_1
+LBB0_1:
+	mov	x9, sp
+	sub	x8, x29, #12
+	str	x8, [x9]
+	adrp	x8, l_.str.1@PAGE
+	add	x8, x8, l_.str.1@PAGEOFF
+	str	x8, [x9, #8]
+	mov	w8, #0
+	stur	w8, [x29, #-12]
+	b	LBB0_2
+LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
+	mov	x9, sp
+	sub	x8, x29, #12
+	str	x8, [x9]
+	mov	x0, #0
+	bl	_scanf
+	ldur	s1, [x29, #-12]
+                                        ; implicit-def: $d0
+	fmov	s0, s1
+	sshll.2d	v0, v0, #0
+                                        ; kill: def $d0 killed $d0 killed $q0
+	scvtf	d0, d0
+	fsqrt	d0, d0
+	fcvtzs	w10, d0
+	mov	x9, sp
+                                        ; implicit-def: $x8
+	mov	x8, x10
+	str	x8, [x9]
+	mov	x0, #0
+	bl	_printf
+	ldur	w9, [x29, #-7]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_2
+	b	LBB0_3
+LBB0_3:
+	mov	w0, #0
+	ldp	x29, x30, [sp, #32]             ; 16-byte Folded Reload
+	add	sp, sp, #48
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-.global _start
+l_.str.1:                               ; @.str.1
+	.asciz	"%d\n"
 
-_start:
-    push {lr}
-    mov sp, lr
-    push {fp, lr}                       # Save frame pointer and link register
-    mov fp, sp
-
-    sub sp, #16                         # Allocate space for local variables
-    str r0, [sp]                        # Store address of input variable in stack
-
-    ldr r0, =printf                   # Load address of printf function
-    ldr r1, [sp, #4]                     # Load address of input variable from stack
-    blr r0                            # Call printf
-
-    cmp r0, #0                          # Check if input was successful
-    bne error_exit                     # Jump to error exit if not
-
-    ldr r0, =scanf                   # Load address of scanf function
-    ldr r1, [sp, #4]                     # Load address of input variable from stack
-    blr r0                            # Call scanf
-
-    cmp r0, #0                          # Check if input was successful
-    bne error_exit                     # Jump to error exit if not
-
-    ldr r0, =print_int                # Load address of print_int function
-    ldr r1, [sp, #4]                     # Load address of input variable from stack
-    blr r0                            # Call print_int
-
-    mov r0, #0                          # Return value
-    bx lr                             # Exit
-
-error_exit:
-    ldr r0, =printf                   # Load address of printf function
-    ldr r1, =error_message              # Load error message from data section
-    blr r0                            # Call printf
-
-    mov r0, #1                          # Exit code
-    bx lr                             # Exit
-
-.data
-error_message: .asciz "Error: Invalid input\n"
-```
-
-### Explanation:
-1. **Stack Frame Management**:
-   - `push {lr}` and `mov sp, lr` save the return address.
-   - `push {fp, lr}` saves the frame pointer and the return address.
-
-2. **Local Variables**:
-   - `sub sp, #16` allocates space for local variables on the stack.
-   - `str r0, [sp]` stores the address of the input variable in the stack.
-
-3. **Calling Functions**:
-   - `ldr r0, =printf` loads the address of the `printf` function.
-   - `ldr r1, [sp, #4]` loads the address of the input variable from the stack.
-   - `blr r0` calls `printf`.
-
-4. **Input Validation**:
-   - `cmp r0, #0` checks if the input was successful.
-   - `bne error_exit` jumps to the error exit block if the input was not successful.
-
-5. **Reading More Inputs**:
-   - `ldr r0, =scanf` loads the address of the `scanf` function.
-   - `ldr r1, [sp, #4]` loads the address of the input variable from the stack.
-   - `blr r0` calls `scanf`.
-
-6. **Output Validation**:
-   - `cmp r0, #0` checks if the input was successful.
-   - `bne error_exit` jumps to the error exit block if the input was not successful.
-
-7. **Printing the Input**:
-   - `ldr r0, =print_int` loads the address of the `print_int` function.
-   - `ldr r1, [sp, #4]` loads the address of the input variable from the stack.
-   - `blr r0` calls `print_int`.
-
-8. **Return**:
-   - `mov r0, #0` sets the return value.
-   - `bx lr` exits the program.
-
-### Data Section:
-- The `.data` section contains the error message used in the `error_exit` block.
-
-This ARM assembly code should produce the same output as the original x86 assembly code when executed on an ARM-based system.
+.subsections_via_symbols

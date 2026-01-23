@@ -1,71 +1,84 @@
-Here is the equivalent ARM assembly for the given x86 assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #80
+	.cfi_def_cfa_offset 80
+	stp	x29, x30, [sp, #64]             ; 16-byte Folded Spill
+	add	x29, sp, #64
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	sub	x8, x29, #18
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldur	w8, [x29, #-18]
+	subs	w8, w8, #1
+	stur	w8, [x29, #-18]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_1
+LBB0_1:
+	mov	x9, sp
+	add	x8, sp, #24
+	str	x8, [x9]
+	add	x8, sp, #28
+	str	x8, [x9, #8]
+	adrp	x1, l_.str.3@PAGE
+	add	x1, x1, l_.str.3@PAGEOFF
+	adrp	x2, l_.str.2@PAGE
+	add	x2, x2, l_.str.2@PAGEOFF
+	bl	_scanf
+	ldur	w8, [x29, #-18]
+	subs	w8, w8, #1
+	stur	w8, [x29, #-18]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_2
+LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
+	mov	x9, sp
+	add	x8, sp, #24
+	str	x8, [x9]
+	add	x8, sp, #28
+	str	x8, [x9, #8]
+	mov	x0, x9
+	bl	_scanf
+	ldr	w8, [sp, #24]
+	ldr	w9, [sp, #28]
+	subs	w8, w8, w9
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_4
+	b	LBB0_3
+LBB0_3:                                 ;   in Loop: Header=BB0_2 Depth=1
+	adrp	x1, l_.str.4@PAGE
+	add	x1, x1, l_.str.4@PAGEOFF
+	bl	_undefined
+	mov	w0, #0
+	ldp	x29, x30, [sp, #64]             ; 16-byte Folded Reload
+	add	sp, sp, #80
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-    .section __TEXT,.text,regular,pure_instructions
-    .build_version macos, 15, 0; sdk_version 15, 5
-    .globl _main                  # -- Begin function main
-    .p2align 4, 0x90
-_main:                              # @main
-    mov r7, sp                     # pushq %rbp
-    str r7, [sp]                   # movq %rsp, %rbp
-    sub sp, 24                    # subq $24, %rsp
-    ldr r0, [pc, #L_str]           # leaq L_.str(%rip), %rdi
-    ldr r1, [sp, #-44]             # leaq -44(%rbp), %rsi
-    mov r0, #0                      # xorl %eax, %eax
-    bl _scanf                      # callq _scanf
-    mov r0, [sp, #-44]             # leaq -44(%rbp), %eax
-    ldr r0, [sp, #-1]              # leal -1(%rax), %ecx
-    mov r0, [sp, #-44]             # leaq -44(%rbp), %eax
-    cmp r0, #0                      # testl %eax, %eax
-    bne LBB0_5                     # jle LBB0_5
-LBB0_1:                             # %bb.1
-    ldr r0, [pc, #L_str_1]         # leaq L_.str.1(%rip), %rbx
-    ldr r1, [sp, #-52]             # leaq -52(%rbp), %r14
-    ldr r2, [sp, #-48]             # leaq -48(%rbp), %r15
-    ldr r3, [pc, #L_str_3]         # leaq L_.str.3(%rip), %r13
-    ldr r4, [pc, #L_str_2]         # leaq L_.str.2(%rip), %r12
-    jmp LBB0_2                     # jmp LBB0_2
-    .p2align 4, 0x90
-LBB0_4:                             #   in Loop: Header=BB0_2 Depth=1
-    mov r0, [sp, #L_str_2]         # movq %r12, %rdi
-    mov r0, [sp, #L_str_4]         # xorl %eax, %eax
-    bl _printf                      # callq _printf
-    mov r0, [sp, #-44]             # leaq -44(%rbp), %eax
-    ldr r0, [sp, #-1]              # leal -1(%rax), %ecx
-    mov r0, [sp, #-44]             # leaq -44(%rbp), %eax
-    cmp r0, #0                      # testl %eax, %eax
-    bne LBB0_5                     # jle LBB0_5
-LBB0_2:                             # =>This Inner Loop Header: Depth=1
-    mov r0, [sp, #L_str_2]         # movq %rbx, %rdi
-    mov r1, [sp, #L_str_4]         # movq %r14, %rsi
-    mov r2, [sp, #L_str_5]         # movq %r15, %rdx
-    mov r0, #0                      # xorl %eax, %eax
-    bl _scanf                      # callq _scanf
-    mov r0, [sp, #-52]             # leaq -52(%rbp), %eax
-    movq r1, [sp, #L_str_6]         # movq %r13, %si
-    cmpl r0, [sp, #L_str_7]         # cmpl -48(%rbp), %eax
-    jl LBB0_4                     # jle LBB0_4
-LBB0_5:
-    mov r0, #0                      # xorl %eax, %eax
-    add sp, 24                    # subq $24, %rsp
-    mov r7, sp                     # popq %rbp
-    ret                          # retq
-                                        # -- End function
-    .section __TEXT,.cstring,cstring_literals
-L_str:                                 # @.str
-    .asciz "%d"
+l_.str.1:                               ; @.str.1
+	.asciz	"%d%d"
 
-L_str_1:                               # @.str.1
-    .asciz "%d%d"
+l_.str.2:                               ; @.str.2
+	.asciz	"%s BRAINS\n"
 
-L_str_2:                               # @.str.2
-    .asciz "BRAINS\n"
+l_.str.3:                               ; @.str.3
+	.asciz	"NO"
 
-L_str_3:                               # @.str.3
-    .asciz "NO"
+l_.str.4:                               ; @.str.4
+	.asciz	"MMM"
 
-L_str_4:                               # @.str.4
-    .asciz "MMM"
-```
-
-Please note that ARM assembly syntax differs from x86 assembly in many ways, such as register names, addressing modes, and control flow structures. The above conversion assumes that the ARM compiler is used, which may require additional adjustments depending on the specific ARM architecture being targeted.
+.subsections_via_symbols

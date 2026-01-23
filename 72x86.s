@@ -1,44 +1,131 @@
-Certainly! Below is the equivalent ARM assembly code for the given x86 assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #64
+	str	w8, [sp, #16]
+	mov	x9, sp
+	adrp	x8, _n@GOTPAGE
+	ldr	x8, [x8, _n@GOTPAGEOFF]
+	str	x8, [x9]
+	adrp	x8, _k@GOTPAGE
+	ldr	x8, [x8, _k@GOTPAGEOFF]
+	str	x8, [x9, #8]
+	str	x8, [x9, #16]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	adrp	x8, _n@GOTPAGE
+	ldr	x8, [x8, _n@GOTPAGEOFF]
+	ldr	w8, [x8]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_1
+	b	LBB0_1
+LBB0_1:
+	mov	w8, #1
+	str	w8, [sp, #12]                   ; 4-byte Folded Spill
+	mov	x9, sp
+	adrp	x8, _breed@PAGE
+	add	x8, x8, _breed@PAGEOFF
+	str	x8, [x9]
+	add	x8, sp, #8
+	str	x8, [x9, #8]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_scanf
+	ldrsw	x9, [sp, #8]
+	adrp	x8, _breed@PAGE
+	add	x8, x8, _breed@PAGEOFF
+	ldr	w8, [x8, x9, lsl #2]
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_2
+LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
+	mov	x9, sp
+	adrp	x8, _breed@PAGE
+	add	x8, x8, _breed@PAGEOFF
+	str	x8, [x9]
+	add	x8, sp, #12
+	str	x8, [x9, #8]
+	mov	x0, x8
+	bl	_scanf
+	ldrsw	x9, [sp, #8]
+	adrp	x8, _breed@PAGE
+	add	x8, x8, _breed@PAGEOFF
+	ldr	w8, [x8, x9, lsl #2]
+	subs	w8, w8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_3
+LBB0_3:                                 ; =>Loop: Header=BB0_6 Depth=1
+	mov	w8, #1
+	str	w8, [sp, #8]                    ; 4-byte Folded Spill
+	add	x8, sp, #8
+	str	x8, [sp]                        ; 8-byte Folded Spill
+	adrp	x9, _n@GOTPAGE
+	ldr	x9, [x9, _n@GOTPAGEOFF]
+	ldr	w9, [x9]
+	subs	w8, w8, w9
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_4
+LBB0_4:                                 ; =>Loop: Header=BB0_6 Depth=1
+	ldr	w8, [sp, #8]                    ; 4-byte Folded Reload
+	add	w8, w8, #1
+	adrp	x9, _n@GOTPAGE
+	ldr	x9, [x9, _n@GOTPAGEOFF]
+	str	w8, [x9, x8, lsl #2]
+	adrp	x8, _k@GOTPAGE
+	ldr	x8, [x8, _k@GOTPAGEOFF]
+	ldrsw	x9, [x8]
+	mov	x8, #0
+	subs	x8, x8, x9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_5
+LBB0_5:                                 ; =>Loop: Header=BB0_6 Depth=1
+	ldr	w8, [sp, #12]                   ; 4-byte Folded Reload
+	add	w8, w8, #1
+	adrp	x9, _n@GOTPAGE
+	ldr	x9, [x9, _n@GOTPAGEOFF]
+	str	w8, [x9, x8, lsl #2]
+	mov	x0, #0
+	str	x0, [sp, #16]                   ; 8-byte Folded Spill
+	mov	x1, #40004
+	bl	_memset_chk
+	b	LBB0_8
+LBB0_6:
+	mov	w8, #1
+	str	w8, [sp, #12]                   ; 4-byte Folded Spill
+	b	LBB0_7
+LBB0_7:
+	ldr	w9, [sp, #12]                   ; 4-byte Folded Reload
+                                        ; implicit-def: $x8
+	mov	x8, x9
+	mov	x9, sp
+	str	x8, [x9]
+	mov	x0, #0
+	bl	_printf
+	ldr	x0, [sp, #16]                   ; 8-byte Folded Reload
+	add	sp, sp, #64
+	ret
+                                        ; -- End function
+	.globl	_breed                          ; @breed
+.zerofill __DATA,__common,_breed,40004,2
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d%d"
 
-```arm
-    .section .text, ax, progbits
-    .global _start
+	.comm	_n,4,2                          ; @n
+	.comm	_k,4,2                          ; @k
+l_.str.1:                               ; @.str.1
+	.asciz	"%d"
 
-_start:
-    # Load arguments from registers
-    ldr r0, [sp, #8]  # r0 = n
-    ldr r1, [sp, #12] # r1 = k
+l_.str.2:                               ; @.str.2
+	.asciz	"%d\n"
 
-    # Print "n = "
-    mov r7, #4          # syscall number for write
-    str r0, [sp, #16]  # address of string to print
-    mov r0, #1         # file descriptor (stdout)
-    swi #0               # syscall to write
-
-    # Print "k = "
-    ldr r0, [sp, #16]  # address of string to print
-    mov r7, #4          # syscall number for write
-    str r1, [sp, #20]  # address of string to print
-    mov r0, #1         # file descriptor (stdout)
-    swi #0               # syscall to write
-
-    # Print newline
-    mov r7, #4          # syscall number for write
-    str r0, [sp, #24]  # address of string to print
-    mov r0, #1         # file descriptor (stdout)
-    swi #0               # syscall to write
-
-    # Exit the program
-    mov r7, #10         # syscall number for exit
-    str r0, [sp, #28]  # status code (0)
-    swi #0               # syscall to exit
-```
-
-### Explanation:
-1. **Load Arguments**: The values of `n` and `k` are loaded into registers `r0` and `r1`, respectively.
-2. **Print "n = "`**: The first value is printed as a string using `swi #4` (write system call).
-3. **Print "k = "`**: The second value is printed as a string using `swi #4`.
-4. **Print Newline**: A newline character is printed using `swi #4`.
-5. **Exit Program**: The program exits with a status code of 0 using `swi #10`.
-
-Note that this code assumes the use of the Linux C standard library functions and system calls. If you need to use specific ARM-specific syscalls or libraries, you may need to adjust the code accordingly.
+.subsections_via_symbols

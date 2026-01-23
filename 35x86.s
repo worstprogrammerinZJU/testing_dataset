@@ -1,117 +1,176 @@
-Here is the equivalent ARM assembly code:
-
-```arm
-.section .data
-    .global _c
-    .zero 50020002, 4
-
-    .section .rodata
-    .globl L_.str
-    .asciz "%d"
-
-    .globl L_.str.1
-    .asciz "%s"
-
-    .globl L_.str.2
-    .asciz "%d\n"
-
-    .section .text
-    .global _start
-
-_start:
-    push {lr}
-    mov sp, lr
-    add sp, #4
-    ldr r1, [sp], #4
-    bl scanf
-
-    ldr r2, [sp], #4
-    bl scanf
-
-    mov r3, [r1]
-    cmp r3, #0
-    beq _end
-
-    mov r4, [r2]
-    cmp r4, #0
-    beq _end
-
-    bl strlen
-
-    mov r5, #0
-    bl strcpy
-
-    mov r6, #0
-    bl strcmp
-
-_end:
-    mov r7, #4
-    str r6, [sp], #4
-    mov r7, #1
-    str r5, [sp], #8
-    bl printf
-
-    mov r7, #0
-    bl exit
-
-strlen:
-    mov r8, r0
-    mov r9, #0
-    mov r10, #0
-
-.Lstrlen_loop:
-    ldr r11, [r8]
-    cmp r11, #0
-    bne .Lstrlen_loop
-    add r9, #1
-    add r8, #4
-    bx lr
-
-strcpy:
-    mov r8, r0
-    mov r9, r1
-    mov r10, #0
-
-.Lstrcpy_loop:
-    ldr r11, [r8]
-    cmp r11, #0
-    bne .Lstrcpy_loop
-    strb r9, [r10]
-    inc r10
-    add r8, #1
-    bx lr
-
-strcmp:
-    mov r8, r0
-    mov r9, r1
-    mov r10, #0
-
-.Lstrcmp_loop:
-    ldr r11, [r8]
-    ldr r12, [r9]
-    cmp r11, r12
-    beq .Lstrcmp_equal
-    cmp r11, #0
-    bne .Lstrcmp_not_equal
-    cmp r12, #0
-    bne .Lstrcmp_not_equal
-    inc r10
-    add r8, #1
-    add r9, #1
-    bx lr
-
-.Lstrcmp_equal:
-    mov r7, #1
-    bx lr
-
-.Lstrcmp_not_equal:
-    mov r7, #0
-    bx lr
-
-exit:
-    mov r7, #0
-    swi #0
-
-```
-
-Please note that this code does not handle error cases such as when `scanf` fails or the strings do not match exactly. Also, it assumes that the input numbers and strings are within the bounds of the memory available for these variables. In a real-world scenario, you would need to add additional checks and error handling to make the program robust.
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #16
+	.cfi_def_cfa_offset 16
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	adrp	x8, _n@GOTPAGE
+	ldr	x8, [x8, _n@GOTPAGEOFF]
+	str	x8, [sp]                        ; 8-byte Folded Spill
+	mov	x1, x8
+	mov	x8, sp
+	str	x8, [x8]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	mov	x9, sp
+	adrp	x8, _str@GOTPAGE
+	ldr	x8, [x8, _str@GOTPAGEOFF]
+	str	x8, [x9]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_scanf
+	ldr	x8, [sp]                        ; 8-byte Folded Reload
+	ldr	w8, [x8]
+	subs	w8, w8, #0
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_1
+LBB0_1:
+	adrp	x8, _ing@GOTPAGE
+	ldr	x8, [x8, _ing@GOTPAGEOFF]
+	mov	x9, x8
+	mov	x8, #10002
+	add	x8, x8, x9
+	and	x8, x8, #0xffffffff
+	strh	w8, [x9]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_2
+	b	LBB0_2
+LBB0_2:
+	adrp	x8, _ing@GOTPAGE
+	ldr	x8, [x8, _ing@GOTPAGEOFF]
+	mov	x9, x8
+	mov	x8, #10002
+	add	x8, x8, x9
+	and	x8, x8, #0xffffffff
+	strh	w8, [x9]
+	subs	x8, x8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_3
+LBB0_3:
+	adrp	x8, _ing@GOTPAGE
+	ldr	x8, [x8, _ing@GOTPAGEOFF]
+	mov	x9, x8
+	mov	x8, #10002
+	add	x8, x8, x9
+	and	x8, x8, #0xffff
+	strh	w8, [x9]
+	subs	x8, x8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_4
+LBB0_4:
+	adrp	x8, _c@PAGE
+	add	x8, x8, _c@PAGEOFF
+	mov	x9, x8
+	mov	x8, #10002
+	add	x8, x8, x9
+	and	x8, x8, #0xffff
+	str	x8, [x9]
+	subs	x8, x8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_5
+LBB0_5:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_7 Depth 2
+	ldrb	w8, [x9, #1]
+	ldrh	w10, [x9, #1]
+	subs	w8, w8, w10
+	cset	w8, gt
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:                                 ;   in Loop: Header=BB0_7 Depth=1
+	adrp	x8, _c@PAGE
+	add	x8, x8, _c@PAGEOFF
+	mov	x9, x8
+	mov	x8, #10002
+	add	x8, x8, x9
+	and	x8, x8, #0xffff
+	strh	w8, [x9]
+	add	x8, x8, #1
+	subs	x8, x8, x9
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_7
+LBB0_7:                                 ;   Parent Loop BB0_6 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_8
+LBB0_8:                                 ;   in Loop: Header=BB0_7 Depth=1
+	ldrh	w8, [x8, #1]
+	ldrh	w10, [x8, #1]
+	subs	w8, w8, w10
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_9
+LBB0_9:                                 ;   in Loop: Header=BB0_7 Depth=1
+	ldrh	w8, [x8, #1]
+	ldrh	w10, [x8, #1]
+	subs	w8, w8, w10
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_10
+LBB0_10:                                ;   in Loop: Header=BB0_7 Depth=1
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_11
+LBB0_11:                                ;   Parent Loop BB0_8 Depth=1
+                                        ; =>  This Inner Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_11
+LBB0_12:                                ;   Parent Loop BB0_9 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_11
+LBB0_13:                                ;   Parent Loop BB0_10 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_12
+LBB0_14:                                ;   Parent Loop BB0_12 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_13
+LBB0_15:                                ;   Parent Loop BB0_14 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_14
+	b	LBB0_15
+LBB0_16:                                ;   Parent Loop BB0_15 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+	ldr	x8, [x8, #1]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_15
+	b	LBB0_16
+LBB0_17:                                ;   Parent Loop BB0_16 Depth=1
+                                        ; =>  This Loop Header: Depth=2
+	ldr	x8, [x8, #

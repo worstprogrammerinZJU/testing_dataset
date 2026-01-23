@@ -1,29 +1,58 @@
-Here is the equivalent ARM assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #32
+	.cfi_def_cfa_offset 32
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	add	x8, sp, #8
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldr	x1, [sp, #8]
+	mov	x8, x1
+	add	x8, x8, #1
+	mul	x8, x8, x1
+	mov	x4, x1
+	adds	x8, x8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_1
+	b	LBB0_2
+LBB0_1:                                 ; =>This Inner Loop Header: Depth=1
+	mov	x0, x1
+	mov	x8, x2
+	udiv	x9, x8, x1
+	mul	x9, x9, x1
+	subs	x8, x8, x9
+	subs	x8, x8, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_1
+	b	LBB0_2
+LBB0_2:
+	mov	x9, sp
+	add	x8, x0, x1, lsl #1
+	str	x8, [x9]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_printf
+	mov	w0, #0
+	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #32
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%ld"
 
-```arm
-.global _start                            # -- Begin function main
-_start:                                   # @main
-    push {r4-r11, lr}                     # Save registers and link register
-    mov r4, sp                          # Set r4 to the stack pointer
-    sub r4, r4, #16                        # Subtract 16 bytes from the stack pointer
-    ldr r3, =printf                      # Load the address of printf into r3
-    ldr r2, [r4, #-8]                   # Load the value from the -8 byte offset in the stack into r2
-    mov r1, r2                          # Move r2 to r1
-    cmp r1, #0                             # Compare r1 with 0
-    bne .loop                              # If not equal, jump to loop
-    ldr r3, =exit                       # Load the address of exit into r3
-    ldr r1, =0                           # Load 0 into r1
-    blx r3                            # Call the exit function with 0 as argument
-    pop {r4-r11, pc}                    # Restore registers and link register
-.loop:                                     # This Inner Loop Header: Depth=1
-    ldr r1, =format                     # Load the address of format into r1
-    ldr r2, [r4, #-8]                   # Load the value from the -8 byte offset in the stack into r2
-    add r1, r1, #2                        # Add 2 to r1
-    ldr r3, [r4, #-4]                   # Load the value from the -4 byte offset in the stack into r3
-    mov r0, r3                          # Move r3 to r0
-    blx r1                            # Call the printf function with r3 as argument
-    sub r4, r4, #16                        # Subtract 16 bytes from the stack pointer
-    bne .loop                              # If not equal, jump to loop
-```
+l_.str.1:                               ; @.str.1
+	.asciz	"%ld\n"
 
-Please note that this is an approximation and might not work directly on all architectures or environments. Also, some details like the specific assembly syntax for certain instructions and how to handle different data types may vary slightly between different ARM processors.
+.subsections_via_symbols

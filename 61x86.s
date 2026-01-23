@@ -1,119 +1,76 @@
-Here is the equivalent ARM assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_cmp                            ; -- Begin function cmp
+	.p2align	2
+_cmp:                                   ; @cmp
+; %bb.0:
+	ldr	w8, [sp, #20]
+	ldr	w9, [sp, #24]
+	subs	w8, w8, w9
+	cset	w8, ge
+	and	w8, w8, #0x1
+	ands	w8, w8, #0x1
+	csetm	w0, eq
+	ret
+                                        ; -- End function
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #16
+	b	LBB1_1
+LBB1_1:
+	adrp	x8, _speed@GOTPAGE
+	ldr	x8, [x8, _speed@GOTPAGEOFF]
+	str	x8, [sp]                        ; 8-byte Folded Spill
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	add	x1, sp, #24
+	bl	_scanf
+	ldr	w8, [sp, #24]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB1_16
+	b	LBB1_1
+LBB1_1:
+	ldr	x8, [sp]                        ; 8-byte Folded Reload
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	mov	w9, #0
+	str	w9, [sp, #16]                   ; 4-byte Folded Spill
+	bic	w8, w8, #0x1
+	str	w8, [sp, #20]                   ; 4-byte Folded Spill
+	mov	w1, #0
+	mov	x2, #4
+	bl	_memset
+	ldr	w8, [sp, #16]                   ; 4-byte Folded Reload
+	ldr	w9, [sp, #20]                   ; 4-byte Folded Reload
+	str	w8, [sp, #12]                   ; 4-byte Folded Spill
+	strb	w9, [sp, #12]                   ; 4-byte Folded Spill
+	ldur	x8, [sp, #24]
+	stlr	x8, [sp, #16]                   ; 8-byte Folded Spill
+	ldur	x8, [x8, #5]
+	stur	x8, [x1, #5]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_memset
+	ldr	w8, [sp, #12]                   ; 4-byte Folded Reload
+	ldur	x8, [x8, #2]
+	stur	x8, [x1, #4]
+	add	w0, w8, #0
+	mov	w1, #0
+	bl	_gethrk
+	ldr	w0, [sp, #16]                   ; 4-byte Folded Reload
+	add	sp, sp, #16
+	ret
+	.cfi.endp
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-    .section ".text", "ax"
-    .global cmp                            ## -- Begin function cmp
-cmp:                                   ## @cmp
-    push {lr}                             ## Save return address
-    mov r1, sp                            ## Move stack pointer to r1
-    ldr r0, [r1], #4                       ## Load first integer from memory into r0
-    mov r1, [r1]                            ## Move second integer from memory into r1
-    cmpl r0, r1                         ## Compare r0 and r1
-    movltne r1, #0                         ## If r0 is not equal to r1, set r1 to 0
-    movtne r1, #0                         ## If r0 is not equal to r1, set r1 to 0
-    pop {pc}                             ## Restore return address
-    .global main                           ## -- Begin function main
-main:                                  ## @main
-    push {lr}                             ## Save return address
-    mov r1, sp                            ## Move stack pointer to r1
-    lea r0, [main+16]                     ## Load string for scanf into r0
-    lea r1, [main+20]                     ## Load string for printf into r1
-    mov r2, #0                             ## Initialize r2 to 0
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+32]                     ## Load string for printf into r2
-    bl printf                             ## Call printf
-    inc r2                                ## Increment r2
-    cmp r2, #0                             ## Check if r2 is less than or equal to 0
-    bge LBB1_16                           ## If r2 is greater than or equal to 0, jump to LBB1_16
-    lea r2, [main+44]                     ## Load variable speed into r2
-    mov r3, #4000                          ## Set value of speed
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+56]                     ## Load array n into r2
-    lea r3, [main+60]                     ## Load array speed into r3
-    bl qsort                               ## Call qsort
-    cmp r2, #0                             ## Check if qsort returned 0
-    beq LBB1_16                           ## If qsort returned 0, jump to LBB1_16
-    lea r2, [main+72]                     ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+84]                     ## Load array speed into r2
-    bl qsort                               ## Call qsort
-    cmp r2, #0                             ## Check if qsort returned 0
-    beq LBB1_16                           ## If qsort returned 0, jump to LBB1_16
-    lea r2, [main+96]                     ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+108]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+120]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+132]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+144]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+156]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+168]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+180]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+192]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+204]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+216]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+228]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+240]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+252]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+264]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+276]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+288]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16                           ## If scanf returned 0, jump to LBB1_16
-    lea r2, [main+300]                    ## Load variable n into r2
-    bl scanf                               ## Call scanf
-    cmp r2, #0                             ## Check if scanf returned 0
-    beq LBB1_16
+	.comm	_n,4,2                          ; @n
+	.comm	_speed,4000,3                   ; @speed
+l_.str.1:                               ; @.str.1
+	.asciz	"%d\n"
+
+.subsections_via_symbols

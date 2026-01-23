@@ -1,45 +1,63 @@
-Here is the equivalent ARM assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #32
+	.cfi_def_cfa_offset 32
+	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
+	add	x29, sp, #16
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	sub	x8, x29, #4
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldur	w8, [x29, #-4]
+	mov	w9, #1
+	b	LBB0_2
+LBB0_1:                                 ;   in Loop: Header=BB0_1 Depth=1
+	mov	w8, #1
+	add	w9, w8, #1
+	mov	w8, #1
+	add	w8, w8, w9
+	subs	w8, w8, #0
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_2
+LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
+	mov	w8, #1
+	subs	w8, w8, w0
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_3
+LBB0_3:                                 ;   in Loop: Header=BB0_1 Depth=1
+	mov	w8, #-2147483647
+	and	w8, w8, w0
+	subs	w8, w8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_4
+LBB0_4:
+	mov	x8, sp
+	str	xzr, [x8]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_printf
+	mov	w0, #0
+	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
+	add	sp, sp, #32
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-    .section __TEXT,__text,regular,pure_instructions
-    .build_version macos, 15, 0; sdk_version 15, 5
-    .globl _main                       ## -- Begin function main
-    .p2align 4, 0x90
-_main:                                  ## @main
-    mov r12, sp                        ; Save old stack pointer
-    add r12, #16                        ; Allocate space for local variables on the stack
-    stkp, [r12]                       ; Store new stack pointer
+l_.str.1:                               ; @.str.1
+	.asciz	"%d\n"
 
-    ldr r0, =L_str                   ; Load address of first string into register r0
-    ldr r1, =-4(r12)                  ; Load address of second string into register r1
-    mov r2, #0                        ; Initialize r2 with 0
-    bl scanf                            ; Call scanf function with arguments r0 and r1
-
-    mov r3, #1                        ; Set r3 to 1
-    mov r4, #1                        ; Set r4 to 1
-    b loop                             ; Jump to loop label
-
-loop:                                   ; Loop header
-    add r3, r4                        ; Add r4 to r3
-    incl r3                          ; Increment r3
-    incl r4                          ; Increment r4
-
-    mov r4, r3                        ; Copy value of r3 into r4
-    cmp r4, #0                        ; Compare r4 with 0
-    je end_loop                         ; If r4 is 0, jump to end_loop label
-
-    ldr r0, =L_str                    ; Load address of second string into register r0
-    ldr r1, =-4(r12)                  ; Load address of third string into register r1
-    mov r2, #0                        ; Initialize r2 with 0
-    bl printf                           ; Call printf function with arguments r0 and r1
-
-end_loop:                              ; End loop label
-    ldr r12, [sp]                        ; Restore old stack pointer
-    add r12, #-16                      ; Deallocate space for local variables on the stack
-    retq                              ; Return from function
-    .section __TEXT,__cstring,cstring_literals
-L_str:                                 ; @.str
-    .asciz "%d"
-```
-
-Please note that this is a simplified version of the original x86 code. In ARM assembly, there are some differences in how registers are handled, as well as the way strings are printed. Also, ARM assembly does not have a direct equivalent of `scanf` and `printf`, so these functions are implemented manually.
+.subsections_via_symbols

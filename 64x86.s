@@ -1,121 +1,202 @@
-To convert the given x86 assembly code to ARM assembly, we need to follow these steps:
-
-1. Understand the x86 assembly code and its functionality.
-2. Translate each instruction to its corresponding ARM instruction.
-3. Adjust for any differences in register usage or addressing modes.
-
-Here's the equivalent ARM assembly code:
-
-```arm
-.section .text
-.global _start
-
-_start:
-    mov r0, #1  ; syscall number for printf
-    ldr r1, =L_str  ; address of the string "%d"
-    ldr r2, =1  ; argument for printf
-    swi #0      ; call printf
-
-    cmp r2, #0
-    blt exit    ; if return value is 0, exit
-
-    mov r0, #1  ; syscall number for scanf
-    ldr r1, =L_str  ; address of the string "%d"
-    ldr r2, =-48  ; argument for scanf
-    swi #0      ; call scanf
-
-    cmp r2, #0
-    bgt exit    ; if return value is 0, exit
-
-    bl reverse  ; call reverse function
-
-    mov r0, #1  ; syscall number for printf
-    ldr r1, =L_str.1  ; address of the string "Scenario #%d:\n%d\n\n"
-    ldr r2, =1  ; argument for printf
-    swi #0      ; call printf
-
-    bl mergesort  ; call mergesort function
-
-exit:
-    mov r0, #0  ; syscall number for exit
-    swi #0      ; call exit
-
-.reverse:
-    mov r0, #1  ; syscall number for scanf
-    ldr r1, =L_str  ; address of the string "%d"
-    ldr r2, =-44  ; argument for scanf
-    swi #0      ; call scanf
-
-    cmp r2, #0
-    bgt exit    ; if return value is 0, exit
-
-    bl reverse  ; call reverse function
-
-    mov r0, #1  ; syscall number for printf
-    ldr r1, =L_str.1  ; address of the string "Scenario #%d:\n%d\n\n"
-    ldr r2, =1  ; argument for printf
-    swi #0      ; call printf
-
-    bl mergesort  ; call mergesort function
-
-.mergesort:
-    mov r0, #1  ; syscall number for scanf
-    ldr r1, =L_str  ; address of the string "%d"
-    ldr r2, =-44  ; argument for scanf
-    swi #0      ; call scanf
-
-    cmp r2, #0
-    bgt exit    ; if return value is 0, exit
-
-    bl merge  ; call merge function
-
-    mov r0, #1  ; syscall number for printf
-    ldr r1, =L_str.1  ; address of the string "Scenario #%d:\n%d\n\n"
-    ldr r2, =1  ; argument for printf
-    swi #0      ; call printf
-
-    bl mergesort  ; call mergesort function
-
-.merge:
-    mov r0, #1  ; syscall number for scanf
-    ldr r1, =L_str  ; address of the string "%d"
-    ldr r2, =-44  ; argument for scanf
-    swi #0      ; call scanf
-
-    cmp r2, #0
-    bgt exit    ; if return value is 0, exit
-
-    bl reverse  ; call reverse function
-
-    mov r0, #1  ; syscall number for printf
-    ldr r1, =L_str.1  ; address of the string "Scenario #%d:\n%d\n\n"
-    ldr r2, =1  ; argument for printf
-    swi #0      ; call printf
-
-    bl mergesort  ; call mergesort function
-
-exit:
-    mov r0, #0  ; syscall number for exit
-    swi #0      ; call exit
-
-.L_str:
-    .asciz "%d"
-
-.L_reverse:
-    .comm _reverse,4,2
-
-.L_str.1:
-    .asciz "Scenario #%d:\n%d\n\n"
-
-.L_z:
-    .comm _z,4000,4
-```
-
-### Explanation:
-- **`mov r0, #1; swi #0`**: This sets up the system call for `printf`.
-- **`cmp r2, #0; bl exit`**: This checks if the return value from `scanf` is zero (indicating success) and exits if it is.
-- **`bl reverse`, `bl mergesort`, `bl merge`**: These calls to functions are similar to their x86 counterparts, using `bl` (branch with link).
-- **`.asciz "%d"`**: This defines the string format for `printf`.
-- **`.comm _reverse,4,2`**: This declares a global variable `_reverse` as a common symbol with size 4 bytes and alignment 2 bytes.
-
-This ARM assembly code should perform the same operations as the original x86 assembly code.
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.globl	_main                           ; -- Begin function main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #80
+	str	x0, [sp, #80]
+	str	x1, [sp, #88]
+	str	x2, [sp, #96]
+	str	x3, [sp, #88]
+	str	x4, [sp, #96]
+	str	w5, [sp, #92]
+	mov	x9, sp
+	add	x8, sp, #48
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldr	w8, [sp, #48]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_1
+LBB0_1:
+	mov	w8, #1
+	adrp	x9, _reverse@GOTPAGE
+	ldr	x9, [x9, _reverse@GOTPAGEOFF]
+	str	w8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	adrp	x8, _reverse@GOTPAGE
+	ldr	x8, [x8, _reverse@GOTPAGEOFF]
+	ldr	w9, [x8]
+                                        ; implicit-def: $x8
+	mov	x8, x9
+	mov	x9, sp
+	str	x8, [x9]
+	adrp	x8, l_.str.1@PAGE
+	add	x8, x8, l_.str.1@PAGEOFF
+	str	x8, [x9, #8]
+	adrp	x1, l_.str.1@PAGE
+	add	x1, x1, l_.str.1@PAGEOFF
+	bl	_printf
+	ldr	w9, [sp, #48]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_2
+LBB0_2:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_4 Depth 2
+	mov	x0, sp
+	add	x1, sp, #52
+	bl	_scanf
+	ldr	w8, [sp, #52]
+	subs	w8, w8, #0
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_3
+LBB0_3:                                 ;   in Loop: Header=BB0_2 Depth=1
+	adrp	x8, _x@GOTPAGE
+	ldr	x8, [x8, _x@GOTPAGEOFF]
+	str	x8, [sp]                        ; 8-byte Folded Spill
+	str	wzr, [x8]
+	subs	w1, w8, #1
+	bl	_mergesort
+	ldr	x8, [sp]                        ; 8-byte Folded Reload
+	ldr	w9, [x8]
+                                        ; implicit-def: $x8
+	mov	x8, x9
+	mov	x9, sp
+	str	x8, [x9]
+	mov	x8, #1
+	str	x8, [x9, #8]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_printf
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ge
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_4
+LBB0_4:                                 ; =>This Loop Header: Depth=1
+                                        ;     Child Loop BB0_4 Depth 2
+	mov	x0, sp
+	add	x1, x0, #8
+	bl	_scanf
+	ldr	x1, [sp]                        ; 8-byte Folded Reload
+	ldur	w8, [x2, #-4]
+	subs	w8, w8, #0
+	cset	w8, gt
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_5
+LBB0_5:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_7
+LBB0_7:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_9
+	b	LBB0_8
+LBB0_8:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_9
+LBB0_9:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_10
+LBB0_10:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_11
+LBB0_11:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_12
+LBB0_12:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_14
+	b	LBB0_13
+LBB0_13:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_15
+	b	LBB0_14
+LBB0_14:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_16
+	b	LBB0_15
+LBB0_15:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_17
+	b	LBB0_16
+LBB0_16:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_18
+	b	LBB0_17
+LBB0_17:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_19
+	b	LBB0_18
+LBB0_18:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_20
+	b	LBB0_19
+LBB0_19:
+	ldur	w9, [x2, #-4]
+	mov	w8, #1
+	subs	w8, w8, w9
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_22
+	b	LBB0_20
+LBB0

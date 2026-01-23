@@ -1,72 +1,89 @@
-To convert the given x86 assembly code to ARM assembly, we need to understand how ARM handles floating-point arithmetic and string operations compared to x86. Here's the equivalent ARM assembly code:
+.section	__TEXT,__text,regular,pure_instructions
+	.build_version macos, 15, 0	sdk_version 15, 5
+	.section	__TEXT,__literal8,8byte_literals
+	.p2align	3                               ; -- Begin function main
+lCPI0_0:
+	.quad	0x400921fb54442d18              ; double 3.1415926535897931
+lCPI0_1:
+	.quad	0x4059000000000000              ; double 100
+	.section	__TEXT,__text,regular,pure_instructions
+	.globl	_main
+	.p2align	2
+_main:                                  ; @main
+; %bb.0:
+	sub	sp, sp, #80
+	.cfi_def_cfa_offset 80
+	stp	x29, x30, [sp, #64]             ; 16-byte Folded Spill
+	add	x29, sp, #64
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
+	mov	x9, sp
+	sub	x8, x29, #24
+	str	x8, [x9]
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_scanf
+	ldur	w8, [x29, #-24]
+	subs	w8, w8, #0
+	cset	w8, le
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_1
+LBB0_1:
+	mov	x9, sp
+	sub	x8, x29, #24
+	str	x8, [x9]
+	sub	x8, x29, #16
+	str	x8, [x9, #8]
+	adrp	x0, l_.str.1@PAGE
+	add	x0, x0, l_.str.1@PAGEOFF
+	bl	_scanf
+	ldur	d1, [x29, #-24]
+	ldur	d2, [x29, #-16]
+	fmov	d0, #2.00000000
+	fmul	d2, d0, d2
+	fmadd	d0, d0, d1, d2
+	adrp	x8, lCPI0_0@PAGE
+	ldr	d1, [x8, lCPI0_0@PAGEOFF]
+	fmul	d0, d0, d1
+	adrp	x8, lCPI0_1@PAGE
+	ldr	d1, [x8, lCPI0_1@PAGEOFF]
+	fdiv	d0, d0, d1
+	fcvtzs	w8, d0
+	add	w10, w8, #1
+	mov	x9, sp
+	str	d1, [x9]
+                                        ; implicit-def: $x8
+	mov	x8, x10
+	str	x8, [x9, #8]
+	adrp	x0, l_.str.2@PAGE
+	add	x0, x0, l_.str.2@PAGEOFF
+	bl	_printf
+	ldur	w8, [x29, #-24]
+	subs	w8, w8, #160
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_2
+	b	LBB0_3
+LBB0_2:
+	adrp	x0, l_.str@PAGE
+	add	x0, x0, l_.str@PAGEOFF
+	bl	_puts
+	mov	w0, #0
+	ldp	x29, x30, [sp, #64]             ; 16-byte Folded Reload
+	add	sp, sp, #80
+	ret
+                                        ; -- End function
+	.section	__TEXT,__cstring,cstring_literals
+l_.str:                                 ; @.str
+	.asciz	"%d"
 
-```arm
-.section .text, ax
-.global _start
-_start:
-    # Load the value of pi from memory
-    ldr r0, [pc, #LCPI0_0]
-    mov r1, #3.1415926535897931
+l_.str.1:                               ; @.str.1
+	.asciz	"%lf %lf"
 
-    # Load the initial number from memory
-    ldr r2, [pc, #LCPI0_1]
-    mov r3, #100
+l_.str.2:                               ; @.str.2
+	.asciz	"Property %d: This property will begin eroding in year %d.\n"
 
-    # Enter a loop to read properties and calculate their erosion years
-loop:
-    # Read two floating-point numbers from memory
-    ldr d0, [pc, #L_.str.1]
-    ldr d1, [pc, #L_.str.2]
+l_str:                                  ; @str
+	.asciz	"END OF OUTPUT."
 
-    # Convert d0 and d1 to integer and store them in r4 and r5
-    fmov s0, d0
-    fmov s1, d1
-    umul sd s0, s0
-    umul sd s1, s1
-    add sd s1, s0
-    mul sd s0, s1
-    fmul sd s0, r3
-
-    # Round the result to an integer and store it in r6
-    frinti sd s0, r6
-
-    # Print the property name and its erosion year
-    ldr d0, [pc, #L_.str.2]
-    bl printf
-
-    # Check if there are more properties to read
-    cmp r4, r2
-    bne loop
-
-    # Print "END OF OUTPUT."
-    ldr d0, [pc, #L_str]
-    bl printf
-
-    # Exit the program
-    mov r0, #0
-    bx lr
-```
-
-### Explanation:
-1. **Load Pi and Initial Number**:
-   - Load the value of `pi` (stored at address `LCPI0_0`) into register `r0`.
-   - Load the initial number (stored at address `LCPI0_1`) into register `r3`.
-
-2. **Loop Through Properties**:
-   - Use a loop (`loop`) to read two floating-point numbers from memory.
-   - Convert the first floating-point number (`d0`) to an integer using `fmul sd s0, s0` and then round it to an integer using `frinti sd s0, r6`.
-   - Print the property name and its erosion year using `bl printf`.
-   - Check if there are more properties to read using `cmp r4, r2` and branch to `loop` if there are more.
-
-3. **Print "END OF OUTPUT."**:
-   - Load the string "END OF OUTPUT." from memory into register `d0`.
-   - Call `printf` to print the message.
-
-4. **Exit Program**:
-   - Move the exit status (0) into register `r0`.
-   - Branch to the system call return point using `bx lr`.
-
-### Notes:
-- The use of floating-point instructions (`fmul sd`, `frinti sd`) is necessary for handling the calculations involving `pi` and `initial number`.
-- The string printing uses the `printf` function, which is specific to ARM architecture.
-- The `bcne` instruction is used to branch if the condition is not equal, which corresponds to the `jne` instruction in x86.
+.subsections_via_symbols
