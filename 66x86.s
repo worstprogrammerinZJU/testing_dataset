@@ -1,4 +1,4 @@
-.section	__TEXT,__text,regular,pure_instructions
+	.section	__TEXT,__text,regular,pure_instructions
 	.build_version macos, 15, 0	sdk_version 15, 5
 	.globl	_main                           ; -- Begin function main
 	.p2align	2
@@ -17,34 +17,23 @@ _main:                                  ; @main
 	adrp	x0, l_.str@PAGE
 	add	x0, x0, l_.str@PAGEOFF
 	bl	_scanf
-	ldur	w8, [x29, #-4]
-	mov	w9, #1
-	b	LBB0_2
-LBB0_1:                                 ;   in Loop: Header=BB0_1 Depth=1
-	mov	w8, #1
-	add	w9, w8, #1
-	mov	w8, #1
-	add	w8, w8, w9
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB0_3
-	b	LBB0_2
-LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
-	mov	w8, #1
-	subs	w8, w8, w0
+	b	LBB0_1
+LBB0_1:                                 ; =>This Inner Loop Header: Depth=1
+	ldr	w8, [sp, #8]
+	subs	w8, w0, w8
 	cset	w8, lt
 	tbnz	w8, #0, LBB0_3
-	b	LBB0_3
-LBB0_3:                                 ;   in Loop: Header=BB0_1 Depth=1
-	mov	w8, #-2147483647
-	and	w8, w8, w0
+	b	LBB0_2
+LBB0_2:                                 ;   in Loop: Header=BB0_1 Depth=1
+	and	w8, w0, #0x80000001
 	subs	w8, w8, #1
 	cset	w8, eq
 	tbnz	w8, #0, LBB0_3
-	b	LBB0_4
-LBB0_4:
-	mov	x8, sp
-	str	xzr, [x8]
+	b	LBB0_3
+LBB0_3:
+	mov	x9, sp
+	mov	x8, #-2147483647
+	str	x8, [x9]
 	adrp	x0, l_.str.1@PAGE
 	add	x0, x0, l_.str.1@PAGEOFF
 	bl	_printf
@@ -61,3 +50,4 @@ l_.str.1:                               ; @.str.1
 	.asciz	"%d\n"
 
 .subsections_via_symbols
+

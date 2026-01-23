@@ -1,4 +1,4 @@
-.section	__TEXT,__text,regular,pure_instructions
+	.section	__TEXT,__text,regular,pure_instructions
 	.build_version macos, 15, 0	sdk_version 15, 5
 	.globl	_main                           ; -- Begin function main
 	.p2align	2
@@ -42,3 +42,4 @@ l_.str.1:                               ; @.str.1
 	.asciz	"%d\n"
 
 .subsections_via_symbols
+

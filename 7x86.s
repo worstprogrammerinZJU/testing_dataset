@@ -1,182 +1,173 @@
-.section	__TEXT,__text,regular,pure_instructions
+	.section	__TEXT,__text,regular,pure_instructions
 	.build_version macos, 15, 0	sdk_version 15, 5
 	.globl	_balance                        ; -- Begin function balance
 	.p2align	2
 _balance:                               ; @balance
 ; %bb.0:
-	sub	sp, sp, #32
-	.cfi_def_cfa_offset 32
-	stp	x29, x30, [sp, #16]             ; 16-byte Folded Spill
-	add	x29, sp, #16
+	sub	sp, sp, #144
+	.cfi_def_cfa_offset 144
+	stp	x29, x30, [sp, #128]            ; 16-byte Folded Spill
+	add	x29, sp, #128
 	.cfi_def_cfa w29, 16
 	.cfi_offset w30, -8
 	.cfi_offset w29, -16
-	str	w0, [sp]
-	ldr	w8, [sp]
-	and	w0, w8, #0x1
-	mov	w1, #0
-	mov	w2, #0
-	bl	_balance
-	ldp	x29, x30, [sp, #16]             ; 16-byte Folded Reload
-	add	sp, sp, #32
+	adrp	x8, _coin@GOTPAGE
+	ldr	x8, [x8, _coin@GOTPAGEOFF]
+	str	x8, [sp, #8]                    ; 8-byte Folded Spill
+	str	x0, [sp, #56]                   ; 8-byte Folded Spill
+	ldrb	w8, [x0]
+	subs	w8, w8, #0
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_1
+LBB0_1:
+	ldr	x9, [sp, #8]                    ; 8-byte Folded Reload
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	add	x8, x8, #1
+	add	x8, x8, x9
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_3
+	b	LBB0_2
+LBB0_2:
+	ldrb	w8, [x0]
+	subs	w8, w8, #0
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_3
+LBB0_3:
+	ldr	x9, [sp, #8]                    ; 8-byte Folded Reload
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	add	x8, x8, #1
+	add	x8, x8, x9
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_5
+	b	LBB0_4
+LBB0_4:
+	ldr	x0, [sp, #56]                   ; 8-byte Folded Reload
+	adrp	x1, l_.str@PAGE
+	add	x1, x1, l_.str@PAGEOFF
+	bl	_strcmp
+	subs	w8, w0, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_6
+	b	LBB0_5
+LBB0_5:
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	ldr	x8, [x8]
+	subs	x8, x8, #1
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_7
+	b	LBB0_6
+LBB0_6:
+	ldr	x0, [sp, #56]                   ; 8-byte Folded Reload
+	adrp	x1, l_.str.1@PAGE
+	add	x1, x1, l_.str.1@PAGEOFF
+	bl	_strcmp
+	subs	w8, w0, #0
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_8
+	b	LBB0_7
+LBB0_7:
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	ldr	x8, [x8]
+	subs	x8, x8, #1
+	cset	w8, gt
+	tbnz	w8, #0, LBB0_9
+	b	LBB0_8
+LBB0_8:
+	ldr	x0, [sp, #56]                   ; 8-byte Folded Reload
+	adrp	x1, l_.str.2@PAGE
+	add	x1, x1, l_.str.2@PAGEOFF
+	bl	_strcmp
+	subs	w8, w0, #0
+	cset	w8, eq
+	tbnz	w8, #0, LBB0_10
+	b	LBB0_9
+LBB0_9:
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	ldr	x8, [x8]
+	subs	x8, x8, #1
+	cset	w8, lt
+	tbnz	w8, #0, LBB0_11
+	b	LBB0_10
+LBB0_10:
+	ldr	x0, [sp, #56]                   ; 8-byte Folded Reload
+	adrp	x1, l_.str.3@PAGE
+	add	x1, x1, l_.str.3@PAGEOFF
+	bl	_strcmp
+	subs	w8, w0, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_12
+	b	LBB0_11
+LBB0_11:
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	ldr	x8, [x8]
+	subs	x8, x8, #1
+	cset	w8, ne
+	tbnz	w8, #0, LBB0_13
+	b	LBB0_12
+LBB0_12:
+	ldr	x9, [sp, #56]                   ; 8-byte Folded Reload
+	mov	w8, #0
+	stur	w8, [x29, #-20]                 ; 4-byte Folded Spill
+	tbnz	w8, #0, LBB0_14
+	b	LBB0_13
+LBB0_13:
+	ldr	x8, [sp, #56]                   ; 8-byte Folded Reload
+	ldur	w10, [x29, #-20]                ; 4-byte Folded Reload
+	and	w8, w8, #0xff
+	stur	w10, [x29, #-4]
+	str	w8, [sp, #44]                   ; 4-byte Folded Spill
+	b	LBB0_14
+LBB0_14:
+	ldr	x0, [sp, #44]                   ; 4-byte Folded Reload
+	ldp	x29, x30, [sp, #128]            ; 16-byte Folded Reload
+	add	sp, sp, #144
 	ret
-	.cfi_end
+                                        ; -- End function
 	.globl	_main                           ; -- Begin function main
 	.p2align	2
 _main:                                  ; @main
-	.cfi_def_cfa_offset 16
-	sub	sp, sp, #48
+; %bb.0:
+	sub	sp, sp, #128
+	.cfi_def_cfa_offset 128
+	stp	x29, x30, [sp, #112]            ; 16-byte Folded Spill
+	add	x29, sp, #112
+	.cfi_def_cfa w29, 16
+	.cfi_offset w30, -8
+	.cfi_offset w29, -16
 	adrp	x8, _coin@GOTPAGE
 	ldr	x8, [x8, _coin@GOTPAGEOFF]
-	str	x8, [sp]                        ; 8-byte Folded Spill
+	str	x8, [sp, #32]                   ; 8-byte Folded Spill
 	adrp	x8, ___stack_chk_guard@GOTPAGE
 	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
 	ldr	x8, [x8]
-	stur	x8, [x29, #-48]
+	stur	x8, [x29, #-8]
 	mov	x9, sp
-	add	x8, sp, #32
+	add	x8, sp, #40
 	str	x8, [x9]
 	adrp	x0, l_.str.3@PAGE
 	add	x0, x0, l_.str.3@PAGEOFF
 	bl	_scanf
-	ldr	w8, [sp]
+	ldr	w8, [sp, #40]
 	subs	w8, w8, #0
 	cset	w8, le
 	tbnz	w8, #0, LBB1_15
 	b	LBB1_1
 LBB1_1:
-	ldr	x9, [sp]                        ; 8-byte Folded Reload
-	mov	x8, #3
-	str	x8, [sp, #8]                    ; 8-byte Folded Spill
-	add	x8, x9, #2
-	subs	x8, x8, #12
-	cset	w8, ne
-	tbnz	w8, #0, LBB1_4
+	mov	w8, #0
+	str	w8, [sp, #28]                   ; 4-byte Folded Spill
 	b	LBB1_2
-LBB1_2:
-	ldr	x9, [sp, #8]                    ; 8-byte Folded Reload
-	ldr	w8, [sp]                        ; 8-byte Folded Reload
-	add	w8, w8, #1
-	str	w8, [sp]                        ; 4-byte Folded Spill
-	b	LBB1_5
-LBB1_3:
-	ldr	x9, [sp]                        ; 8-byte Folded Reload
-	ldr	w8, [sp, #8]                    ; 8-byte Folded Reload
-	subs	w8, w8, #1
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_7
-	b	LBB1_4
-LBB1_4:
-	ldr	x9, [sp]                        ; 8-byte Folded Reload
-	ldr	w8, [sp, #8]                    ; 8-byte Folded Reload
-	add	w8, w8, #1
-	str	w8, [sp]                        ; 4-byte Folded Spill
-	b	LBB1_6
-LBB1_5:
-	ldr	x9, [sp]                        ; 8-byte Folded Reload
-	ldr	w8, [sp, #8]                    ; 8-byte Folded Reload
-	subs	w8, w8, #3
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_8
-	b	LBB1_6
-LBB1_6:
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_7
-LBB1_7:
-	ldur	x9, [x29, #-48]
-	adrp	x8, ___stack_chk_guard@GOTPAGE
-	ldr	x8, [x8, ___stack_chk_guard@GOTPAGEOFF]
-	ldr	x8, [x8]
-	subs	x8, x8, x9
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_9
-	b	LBB1_8
-LBB1_8:
-	bl	___stack_chk_fail
-LBB1_9:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_11
-	b	LBB1_10
-LBB1_10:
-	mov	w8, #3
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_11
-LBB1_11:
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_12
-LBB1_12:
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_12
-LBB1_13:
-	ldr	x9, [sp]                        ; 8-byte Folded Reload
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_12
-LBB1_14:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_16
-	b	LBB1_15
-LBB1_15:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_17
-	b	LBB1_16
-LBB1_16:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_18
-	b	LBB1_17
-LBB1_17:
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_18
-LBB1_18:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_20
-	b	LBB1_20
-LBB1_19:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, ne
-	tbnz	w8, #0, LBB1_22
-	b	LBB1_21
-LBB1_20:
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_22
-LBB1_21:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_23
-	b	LBB1_22
-LBB1_22:
-	mov	w8, #3
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_23
-LBB1_23:
-	mov	w8, #12
-	str	w8, [sp, #4]                    ; 4-byte Folded Spill
-	b	LBB1_23
-LBB1_24:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w8, #0, LBB1_25
-	b	LBB1_26
-LBB1_25:
-	ldr	w8, [sp, #4]                    ; 4-byte Folded Reload
-	subs	w8, w8, #0
-	cset	w8, eq
-	tbnz	w
+LBB1_2:                                 ;   in Loop: Header=BB1_3 Depth=1
+	ldr	w8, [sp, #44]
+	add	w10, w8, #65
+	mov	x9, sp
+                                        ; implicit-def: $x8
+	mov	x8, x10
+	str	x8, [x9]
+	adrp	x0, l_.str.5@PAGE
+	add	x0, x0, l_.str.5@PAGEOFF
+	bl	_printf
+	ldr	w8,

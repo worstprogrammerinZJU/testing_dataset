@@ -1,4 +1,4 @@
-.section	__TEXT,__text,regular,pure_instructions
+	.section	__TEXT,__text,regular,pure_instructions
 	.build_version macos, 15, 0	sdk_version 15, 5
 	.section	__TEXT,__literal8,8byte_literals
 	.p2align	3                               ; -- Begin function main
@@ -44,17 +44,21 @@ LBB0_1:
 	fmov	d1, #1.00000000
 	fadd	d0, d0, d1
 	ldur	d1, [x29, #-24]
-	fmov	d2, d0
+	ldur	w8, [x29, #-28]
+	str	w8, [x9, #28]
+	b	LBB0_2
+LBB0_2:                                 ; =>This Inner Loop Header: Depth=1
+	fmov	d1, d0
 	ldur	d0, [x29, #-24]
-	fmul	d0, d0, d2
-	fsub	d0, d0, #0
+	fmul	d0, d0, d1
+	subs	w8, w0, #1
 	cset	w8, ne
 	tbnz	w8, #0, LBB0_2
 	b	LBB0_3
-LBB0_2:
-	stur	d0, [x29, #-24]
-	b	LBB0_3
 LBB0_3:
+	stur	d0, [x29, #-24]
+	b	LBB0_4
+LBB0_4:
 	stur	w0, [x29, #-12]
 	ldur	d0, [x29, #-24]
 	fcvtzs	w10, d0
@@ -78,3 +82,4 @@ l_.str.1:                               ; @.str.1
 	.asciz	"%d\n"
 
 .subsections_via_symbols
+
