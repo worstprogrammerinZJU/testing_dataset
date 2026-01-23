@@ -23,7 +23,8 @@ jobs:
         mkdir -p successful_files
         
         TOTAL=0
-        SUCCESS=0
+        COMPILE_SUCCESS=0
+        EXECUTE_SUCCESS=0
         
         for file in *.s; do
           if [ -f "$file" ]; then
@@ -35,11 +36,12 @@ jobs:
             
             # 编译
             if clang "$file" -o "$NAME" 2>/dev/null; then
+              COMPILE_SUCCESS=$((COMPILE_SUCCESS + 1))
               echo "✅ 编译成功"
               
               # 执行测试
               if echo -e "1\n2 3" | timeout 3 ./"$NAME" >/dev/null 2>&1; then
-                SUCCESS=$((SUCCESS + 1))
+                EXECUTE_SUCCESS=$((EXECUTE_SUCCESS + 1))
                 echo "✅ 执行成功"
                 
                 # 保存文件（保留原文件名）
@@ -56,9 +58,39 @@ jobs:
         done
         
         echo "========================================"
-        echo "测试完成: $SUCCESS/$TOTAL 个文件成功"
-        echo "成功文件列表:"
-        ls -la successful_files/ 2>/dev/null || echo "无成功文件"
+        echo "测试完成"
+        echo "========================================"
+        
+        if [ $TOTAL -gt 0 ]; then
+          # 计算编译成功率
+          COMPILE_RATE=$(echo "scale=2; $COMPILE_SUCCESS * 100 / $TOTAL" | bc)
+          
+          # 计算执行成功率（基于编译成功的文件）
+          if [ $COMPILE_SUCCESS -gt 0 ]; then
+            EXECUTE_RATE=$(echo "scale=2; $EXECUTE_SUCCESS * 100 / $COMPILE_SUCCESS" | bc)
+          else
+            EXECUTE_RATE=0
+          fi
+          
+          # 计算总体成功率
+          OVERALL_RATE=$(echo "scale=2; $EXECUTE_SUCCESS * 100 / $TOTAL" | bc)
+          
+          echo "📊 统计结果:"
+          echo "📁 测试文件总数: $TOTAL"
+          echo "✅ 编译成功: $COMPILE_SUCCESS/$TOTAL ($COMPILE_RATE%)"
+          echo "🚀 执行成功: $EXECUTE_SUCCESS/$COMPILE_SUCCESS ($EXECUTE_RATE%)"
+          echo "🎯 总体成功率: $EXECUTE_SUCCESS/$TOTAL ($OVERALL_RATE%)"
+          
+          echo "========================================"
+          echo "📁 保存的成功文件 ($EXECUTE_SUCCESS 个):"
+          if [ -d "successful_files" ] && [ "$(ls -A successful_files/ 2>/dev/null)" ]; then
+            ls -la successful_files/
+          else
+            echo "无成功文件"
+          fi
+        else
+          echo "⚠️  未找到 .s 文件"
+        fi
     
     - name: Upload successful files
       uses: actions/upload-artifact@v4
